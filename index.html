@@ -2,1612 +2,1500 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中学物理实验管理系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>物理实验系统 | 中学物理助手</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --info-color: #3498db;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --light-text: #7f8c8d;
-            --border-radius: 12px;
-            --box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        :root {
+            --primary: #e6a157;
+            --primary-dark: #c47d3a;
+            --bg-dark: #2c2418;
+            --bg-light: #fef9f0;
+            --card-bg: #ffffff;
+            --text-dark: #2c2418;
+            --text-light: #5a4a38;
+            --border: #e6d5c0;
+            --shadow: 0 8px 20px rgba(0,0,0,0.08);
+            --header-bg: rgba(74, 46, 30, 0.94);
+            --transition: all 0.3s ease;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--dark-text);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            transition: background 0.3s, color 0.3s;
         }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 40px);
+
+        body.dark {
+            --bg-light: #1e1e2a;
+            --card-bg: #2a2a36;
+            --text-dark: #f0f0f0;
+            --text-light: #c0c0c0;
+            --border: #3a3a4a;
+            --header-bg: rgba(30, 30, 40, 0.96);
+            background-color: #1a1a2a;
         }
-        
-        .header {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, #34495e 100%);
-            color: white;
-            padding: 25px 30px;
+
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            height: 70px;
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
-        
-        .header-content {
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fef3e2;
+            letter-spacing: 1px;
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 2rem;
+        }
+        .desktop-nav a {
+            color: #fef3e2;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .desktop-nav a:hover, .desktop-nav a.active {
+            border-bottom-color: var(--primary);
+            color: #ffdd99;
+        }
+
+        .user-area {
             display: flex;
             align-items: center;
             gap: 15px;
+            cursor: pointer;
         }
-        
-        .logo {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-        }
-        
-        .header-text h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-        }
-        
-        .header-text p {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-        
-        .main-content {
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
             display: flex;
-            flex: 1;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
             overflow: hidden;
         }
-        
-        .sidebar {
-            width: 300px;
-            background: var(--light-bg);
-            padding: 25px;
-            border-right: 1px solid #eee;
-            overflow-y: auto;
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        
-        .content {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            background: #fafafa;
+        .user-name {
+            color: #fef3e2;
+            font-weight: 500;
         }
-        
-        .section-title {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            color: var(--secondary-color);
+        .logout-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .hamburger {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #fef3e2;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 1100;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 70px;
+            left: -280px;
+            width: 260px;
+            height: calc(100% - 70px);
+            background: var(--card-bg);
+            box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+            z-index: 999;
+            transition: left 0.3s ease;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .mobile-menu.open {
+            left: 0;
+        }
+        .mobile-menu a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .mobile-menu a.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .main-content {
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+            padding: 2rem 5%;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        /* 轮播图 */
+        .carousel-container {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+        .carousel-slides {
+            position: relative;
+            aspect-ratio: 16 / 9;
+        }
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 6%;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .carousel-slide.active {
+            opacity: 1;
+        }
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            padding: 2rem 3rem;
+            border-radius: 40px;
+            text-align: left;
+            max-width: 60%;
+            min-width: 380px;
+            border-left: 6px solid var(--primary);
+        }
+        .carousel-caption h3 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            letter-spacing: 2px;
+        }
+        .carousel-caption p {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.55);
+            border: none;
+            color: white;
+            font-size: 2.5rem;
+            padding: 0 1rem;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50px;
+            transition: 0.2s;
+        }
+        .carousel-btn:hover {
+            background: rgba(0,0,0,0.85);
+        }
+        .carousel-prev { left: 15px; }
+        .carousel-next { right: 15px; }
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .dot.active {
+            background: var(--primary);
+            width: 24px;
+            border-radius: 10px;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+        .filter-bar select, .filter-bar input {
+            padding: 10px 16px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .filter-bar .btn {
+            background: var(--primary);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .experiments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .exp-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .exp-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+        .exp-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+        .exp-meta {
+            display: flex;
+            gap: 12px;
+            margin: 8px 0;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+        .exp-purpose {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        /* 面包屑导航 */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            flex-wrap: wrap;
+        }
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb .separator {
+            color: var(--text-light);
+        }
+        .breadcrumb .current {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* 实验详情页样式 */
+        .exp-detail-header {
+            margin-bottom: 2rem;
+        }
+        .exp-detail-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        .exp-detail-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .exp-detail-section {
+            margin-bottom: 1.8rem;
+        }
+        .exp-detail-section h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
-        .section-title i {
-            color: var(--primary-color);
+        .exp-detail-section ul, .exp-detail-section ol {
+            margin-left: 1.8rem;
+            line-height: 1.6;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+        .exp-detail-section li {
+            margin: 0.5rem 0;
         }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark-text);
-        }
-        
-        select, input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+        .back-to-list {
+            display: inline-block;
+            margin-top: 1rem;
+            background: var(--primary);
             color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
+            padding: 8px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .back-to-list:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* 动画容器 */
+        .experiment-animation {
+            background: var(--bg-light);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 1.8rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .experiment-animation canvas {
+            max-width: 100%;
+            height: auto;
+            background: #f0f0f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        body.dark .experiment-animation canvas {
+            background: #2a2a36;
+        }
+
+        /* 个人表单 */
+        .profile-form .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .profile-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .profile-form input {
             width: 100%;
+            padding: 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-dark);
+        }
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #ddd;
+            margin-bottom: 15px;
+            overflow: hidden;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
         }
-        
+        .btn {
+            background: var(--primary);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2c2418;
+        }
         .btn:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+
+        /* 修改密码区块 */
+        .password-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
         }
-        
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color) 0%, #27ae60 100%);
+        .password-section h3 {
+            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
         }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning-color) 0%, #f39c12 100%);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, var(--accent-color) 0%, #c0392b 100%);
-        }
-        
-        .stats-grid {
+        .password-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: 120px 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.2rem;
         }
-        
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        .password-grid label {
+            font-weight: 600;
+            text-align: right;
+        }
+        .password-grid input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-dark);
+        }
+        .password-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
+        /* 首页附加区块 */
+        .slogan-section {
+            background: linear-gradient(135deg, #4b6a4b, #2c5e2c);
+            border-radius: 28px;
+            padding: 3rem 2rem;
             text-align: center;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            color: var(--light-text);
-            font-size: 0.9rem;
-        }
-        
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-        
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--light-text);
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--primary-color);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .experiment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-        }
-        
-        .experiment-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--primary-color);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .experiment-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-        
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--secondary-color);
-            flex: 1;
-        }
-        
-        .type-badge {
-            background: var(--warning-color);
+            margin-bottom: 2rem;
             color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-left: 10px;
         }
-        
-        .grade-badge {
-            background: #e3f2fd;
-            color: var(--primary-color);
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
+        .slogan-section blockquote {
+            font-size: 1.4rem;
+            font-style: italic;
         }
-        
-        .card-body {
-            margin-bottom: 15px;
+        .store-section {
+            background: var(--card-bg);
+            border-radius: 28px;
+            margin-bottom: 2rem;
+            overflow: hidden;
         }
-        
-        .card-section {
-            margin-bottom: 12px;
-        }
-        
-        .card-section-title {
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-        
-        .card-section-content {
-            color: var(--light-text);
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        
-        .equipment-list {
+        .store-flex {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 5px;
         }
-        
-        .equipment-item {
-            background: #f0f0f0;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            color: var(--light-text);
+        .store-img {
+            flex: 1;
+            min-height: 280px;
+            background-image: url('https://picsum.photos/id/260/800/600');
+            background-size: cover;
+            background-position: center;
         }
-        
+        .store-info {
+            flex: 1;
+            padding: 2rem;
+            background: var(--card-bg);
+        }
+        .store-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        .btn-outline {
+            display: inline-block;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 24px;
+            border-radius: 40px;
+            margin-top: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .products-section {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 2rem;
+            text-align: center;
+        }
+        .products-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .product-card {
+            width: 220px;
+            background: var(--bg-light);
+            border-radius: 20px;
+            padding: 1rem;
+            transition: 0.2s;
+        }
+        .product-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        /* 登录模态框 - 透明毛玻璃 + 左侧图片 */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
+        .auth-container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
             width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
+            max-width: 900px;
+            overflow: hidden;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        
+        body.dark .auth-container {
+            background: rgba(30, 30, 42, 0.7);
+            border-color: rgba(255,255,255,0.1);
+        }
+        .auth-inner {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .auth-left {
+            flex: 1.2;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            min-height: 400px;
+        }
+        .auth-left img {
+            max-width: 80%;
+            margin-bottom: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .auth-left h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .auth-left p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        .auth-right {
+            flex: 1;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+        }
+        body.dark .auth-right {
+            background: rgba(30, 30, 42, 0.85);
+        }
+        .auth-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.8rem;
+        }
+        .auth-topbar h2 {
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
         .close-modal {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 2rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            color: var(--light-text);
+            color: var(--text-light);
+            transition: 0.2s;
         }
-        
-        .modal-header {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
+        .close-modal:hover {
+            color: var(--primary);
         }
-        
-        .modal-title {
+        .auth-input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+        .auth-input-group {
+            position: relative;
+            margin: 10px 0;
+        }
+        .auth-input-group .auth-input {
+            margin: 0;
+            padding-right: 40px;
+        }
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #2ecc71;
+            font-size: 1.1rem;
+        }
+        .input-icon.error {
+            color: #e74c3c;
+        }
+        .input-validation-msg {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            margin-left: 12px;
+            display: none;
+        }
+        .input-validation-msg.show {
+            display: block;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        .auth-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 返回顶部悬浮球 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1500;
+            opacity: 0.9;
+        }
+        .back-to-top:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            opacity: 1;
+        }
+        .back-to-top i {
+            color: white;
             font-size: 1.5rem;
-            color: var(--secondary-color);
-            margin-bottom: 10px;
         }
-        
-        .modal-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .modal-steps {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        
-        .modal-steps ol {
-            padding-left: 20px;
-        }
-        
-        .modal-steps li {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        
-        .modal-equation {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--light-text);
-        }
-        
-        .no-results i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-        
-        .no-results h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--light-text);
-        }
-        
-        .loading i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .api-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        
-        .api-endpoint {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .api-method {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-right: 10px;
-            font-family: monospace;
-        }
-        
-        .get-method { background: #d4edda; color: #155724; }
-        .post-method { background: #cce5ff; color: #004085; }
-        .put-method { background: #fff3cd; color: #856404; }
-        .delete-method { background: #f8d7da; color: #721c24; }
-        
         @media (max-width: 768px) {
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+            .back-to-top i {
+                font-size: 1.2rem;
+            }
+            .auth-left {
+                display: none;
+            }
+            .auth-right {
+                padding: 1.5rem;
+            }
+            .desktop-nav, .user-name, .logout-btn {
+                display: none;
+            }
+            .hamburger {
+                display: block;
+            }
             .main-content {
+                padding: 1rem;
+            }
+            .carousel-caption {
+                max-width: 85%;
+                min-width: unset;
+                padding: 1rem 1.2rem;
+            }
+            .carousel-caption h3 {
+                font-size: 1.5rem;
+            }
+            .carousel-caption p {
+                font-size: 0.9rem;
+            }
+            .store-flex {
                 flex-direction: column;
             }
-            
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #eee;
-            }
-            
-            .experiment-grid {
+            .password-grid {
                 grid-template-columns: 1fr;
+                gap: 0.5rem;
             }
-            
-            .header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
+            .password-grid label {
+                text-align: left;
+            }
+            .exp-detail-title {
+                font-size: 1.5rem;
             }
         }
+        .section-title {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-flask"></i>
+
+<header class="site-header">
+    <div class="logo-area">
+        <i class="fas fa-flask logo-icon"></i>
+        <span class="logo-text">中学物理实验系统</span>
+    </div>
+    <button class="hamburger" id="hamburgerBtn">☰</button>
+    <nav class="desktop-nav" id="desktopNav">
+        <a href="#" data-page="home" class="active">首页</a>
+        <a href="#" data-page="experiments">实验列表</a>
+        <a href="#" data-page="profile">个人中心</a>
+        <a href="#" data-page="settings">系统设置</a>
+    </nav>
+    <div class="user-area" id="userArea">
+        <div class="user-avatar" id="userAvatar"><i class="fas fa-user"></i></div>
+        <span class="user-name" id="userNameDisplay">未登录</span>
+        <button class="logout-btn" id="logoutBtn" style="display: none;">退出</button>
+    </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+    <a href="#" data-page="home">首页</a>
+    <a href="#" data-page="experiments">实验列表</a>
+    <a href="#" data-page="profile">个人中心</a>
+    <a href="#" data-page="settings">系统设置</a>
+</div>
+
+<main class="main-content" id="appContent"></main>
+<footer><p>© 2025 中学物理实验系统 | 格物致知 · 知行合一</p></footer>
+
+<!-- 返回顶部悬浮球 -->
+<div class="back-to-top" id="backToTopBtn">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
+<div id="authModal" class="modal">
+    <div class="auth-container">
+        <div class="auth-inner">
+            <div class="auth-left">
+                <img src="https://picsum.photos/id/20/300/400" alt="物理实验插画">
+                <h3><i class="fas fa-flask"></i> 物理实验室</h3>
+                <p>探索科学奥秘，动手实践真知</p>
+            </div>
+            <div class="auth-right">
+                <div class="auth-topbar">
+                    <h2><i class="fas fa-atom"></i> 物理实验助手</h2>
+                    <span class="close-modal" onclick="closeAuthModal()">&times;</span>
                 </div>
-                <div class="header-text">
-                    <h1>中学物理实验管理系统</h1>
-                    <p>初中物理（21个） + 高中物理（21个） = 42个标准实验</p>
+                <div id="authError" class="auth-error"></div>
+                <div id="loginForm">
+                    <div class="auth-input-group">
+                        <input type="email" id="loginEmail" class="auth-input" placeholder="邮箱" autocomplete="off">
+                        <span id="loginEmailIcon" class="input-icon" style="display: none;"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                    <div id="loginEmailMsg" class="input-validation-msg"></div>
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="密码">
+                    <button class="auth-btn btn" onclick="login()">登录</button>
+                    <div class="auth-switch" onclick="toggleAuthMode()">还没有账号？去注册</div>
+                </div>
+                <div id="registerForm" style="display:none;">
+                    <input type="text" id="regName" class="auth-input" placeholder="用户名">
+                    <div class="auth-input-group">
+                        <input type="email" id="regEmail" class="auth-input" placeholder="邮箱" autocomplete="off">
+                        <span id="regEmailIcon" class="input-icon" style="display: none;"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                    <div id="regEmailMsg" class="input-validation-msg"></div>
+                    <input type="password" id="regPassword" class="auth-input" placeholder="密码（至少6位）">
+                    <button class="auth-btn btn" onclick="register()">注册</button>
+                    <div class="auth-switch" onclick="toggleAuthMode()">已有账号？去登录</div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 完整实验数据（42个）----------
+    const allExperiments = [
+        { name: "用刻度尺测量长度，用表测量时间", grade: "初中", category: "力学", purpose: "掌握长度和时间测量基本工具的使用方法", equipment: ["刻度尺", "秒表", "记录纸"], steps: ["1. 观察刻度尺的量程和分度值", "2. 将刻度尺紧贴被测物体", "3. 视线与刻度尺垂直读数", "4. 用秒表测量单摆周期或物体运动时间", "5. 多次测量取平均值"], notes: "读数时要估读到分度值的下一位；秒表使用前需归零" },
+        { name: "用弹簧测力计测量力", grade: "初中", category: "力学", purpose: "学习使用弹簧测力计测量力的大小", equipment: ["弹簧测力计", "钩码", "铁架台"], steps: ["1. 观察测力计量程和分度值", "2. 检查指针是否指零", "3. 竖直悬挂测力计", "4. 挂钩码并读数", "5. 记录不同钩码数量对应的拉力"], notes: "测量时不可超过量程；弹簧测力计要沿力的方向使用" },
+        { name: "用托盘天平测量物体的质量", grade: "初中", category: "力学", purpose: "掌握托盘天平的使用方法，测量物体质量", equipment: ["托盘天平", "砝码", "待测物体", "镊子"], steps: ["1. 将天平放在水平台面上", "2. 调节平衡螺母使指针指中央", "3. 左物右码放置", "4. 用镊子加减砝码", "5. 移动游码直至平衡", "6. 记录质量"], notes: "不能用手拿砝码；潮湿物体不能直接放在托盘上" },
+        { name: "测量物体运动的速度", grade: "初中", category: "力学", purpose: "通过测量路程和时间计算平均速度", equipment: ["斜面", "小车", "刻度尺", "停表"], steps: ["1. 搭建斜面并固定", "2. 测量小车通过的路程", "3. 释放小车并同时计时", "4. 记录小车到达终点的时间", "5. 计算平均速度 v=s/t"], notes: "多次测量取平均值；斜面倾角不宜过大" },
+        { name: "测量水平运动物体所受的滑动摩擦力", grade: "初中", category: "力学", purpose: "用弹簧测力计匀速拉动测量摩擦力", equipment: ["木块", "弹簧测力计", "木板", "砝码"], steps: ["1. 将木块放在木板上", "2. 用弹簧测力计水平匀速拉动木块", "3. 读取拉力示数（等于摩擦力）", "4. 改变压力（加砝码）重复实验"], notes: "必须匀速直线拉动；弹簧测力计要与木板平行" },
+        { name: "测量固体和液体的密度", grade: "初中", category: "力学", purpose: "用天平和量筒测定物质密度", equipment: ["天平", "量筒", "石块", "水", "细线"], steps: ["1. 用天平测石块质量", "2. 量筒中倒入适量水记录体积V1", "3. 用细线拴住石块浸没水中记录V2", "4. 计算密度 ρ=m/(V2-V1)", "5. 测液体密度时先测空杯质量，再测总质量，用量筒测体积"], notes: "测量液体密度时需减去容器质量；读数时视线与凹液面最低处相平" },
+        { name: "探究滑动摩擦力大小与哪些因素有关", grade: "初中", category: "力学", purpose: "探究压力、接触面粗糙程度对摩擦力的影响", equipment: ["木块", "砝码", "弹簧测力计", "毛巾", "木板"], steps: ["1. 用弹簧测力计匀速拉动木块测摩擦力", "2. 在木块上放砝码改变压力", "3. 在木板上铺毛巾改变粗糙程度", "4. 记录并分析数据"], notes: "控制变量法；每次实验都要匀速拉动" },
+        { name: "探究液体压强与哪些因素有关", grade: "初中", category: "力学", purpose: "探究液体内部压强与深度、密度的关系", equipment: ["压强计", "大烧杯", "水", "盐水"], steps: ["1. 检查压强计气密性", "2. 将探头放入水中不同深度", "3. 观察U形管液面高度差", "4. 换用盐水重复实验"], notes: "深度指探头到液面的竖直距离；U形管液面差越大压强越大" },
+        { name: "探究浮力大小与哪些因素有关", grade: "初中", category: "力学", purpose: "探究浮力与排开液体体积、液体密度的关系", equipment: ["弹簧测力计", "溢水杯", "石块", "水", "盐水"], steps: ["1. 测石块重力G", "2. 石块浸入水中测拉力F", "3. 浮力F浮=G-F", "4. 改变浸入体积和液体密度重复实验"], notes: "物体要缓慢浸入；溢水杯水要加至溢水口" },
+        { name: "探究杠杆的平衡条件", grade: "初中", category: "力学", purpose: "验证杠杆平衡条件 F1L1 = F2L2", equipment: ["杠杆", "钩码", "铁架台", "刻度尺"], steps: ["1. 调节杠杆水平平衡", "2. 在两侧挂不同数量钩码", "3. 移动钩码位置使杠杆再次平衡", "4. 记录动力、阻力、动力臂、阻力臂", "5. 分析数据得出F1L1=F2L2"], notes: "力臂是支点到力的作用线的距离；实验多次避免偶然性" },
+        { name: "测量做直线运动物体的瞬时速度", grade: "高中", category: "力学", purpose: "使用打点计时器测量瞬时速度", equipment: ["打点计时器", "纸带", "刻度尺", "交流电源", "小车"], steps: ["1. 安装打点计时器", "2. 纸带穿过限位孔", "3. 接通电源释放小车", "4. 选取清晰点迹", "5. 测量中间时刻位移计算瞬时速度"], notes: "先接通电源再释放纸带；选取点迹清晰的纸带" },
+        { name: "探究弹簧弹力与形变量的关系", grade: "高中", category: "力学", purpose: "探究胡克定律 F = kx", equipment: ["弹簧", "刻度尺", "钩码", "铁架台"], steps: ["1. 测量弹簧原长", "2. 依次挂不同质量钩码", "3. 记录伸长量", "4. 绘制F-x图象", "5. 计算劲度系数k"], notes: "弹簧不能超过弹性限度；图象应为过原点直线" },
+        { name: "探究两个互成角度的力的合成规律", grade: "高中", category: "力学", purpose: "验证力的平行四边形定则", equipment: ["橡皮条", "细绳套", "弹簧测力计", "图钉", "白纸"], steps: ["1. 固定橡皮条一端", "2. 用两个弹簧测力计拉至O点", "3. 记录力的大小和方向", "4. 用一个弹簧测力计拉至同一点O", "5. 作平行四边形验证"], notes: "拉力适当大些；O点位置要准确标记" },
+        { name: "探究加速度与物体受力、物体质量的关系", grade: "高中", category: "力学", purpose: "验证牛顿第二定律 F = ma", equipment: ["小车", "打点计时器", "砂桶", "砝码", "导轨", "纸带"], steps: ["1. 平衡摩擦力", "2. 小车质量不变改变拉力", "3. 拉力不变改变小车质量", "4. 计算加速度", "5. 绘制a-F、a-1/m图象"], notes: "砂桶质量远小于小车质量；平衡摩擦力时不能挂砂桶" },
+        { name: "验证机械能守恒定律", grade: "高中", category: "力学", purpose: "通过自由落体或斜面实验验证机械能守恒", equipment: ["打点计时器", "重锤", "纸带", "铁架台", "刻度尺"], steps: ["1. 安装器材", "2. 释放纸带", "3. 选取点迹清晰的纸带", "4. 测量下落高度和瞬时速度", "5. 计算重力势能减少和动能增加"], notes: "先接通电源再释放重锤；阻力尽量小" },
+        { name: "探究平抛运动的特点", grade: "高中", category: "力学", purpose: "研究平抛运动水平匀速、竖直自由落体", equipment: ["平抛实验器", "白纸", "复写纸", "刻度尺", "小球"], steps: ["1. 调节轨道水平", "2. 释放小球", "3. 描出轨迹点", "4. 分析x、y关系", "5. 得出水平匀速、竖直匀加速"], notes: "轨道末端水平；小球从同一高度释放" },
+        { name: "探究向心力大小与半径、角速度、质量的关系", grade: "高中", category: "力学", purpose: "探究向心力公式 F = mω²r", equipment: ["向心力演示器", "砝码", "刻度尺", "转速计"], steps: ["1. 控制变量法", "2. 改变m、r、ω", "3. 记录向心力", "4. 分析F与各量的关系"], notes: "保持其他量不变；实验前检查仪器" },
+        { name: "长度的测量及其测量工具的选用", grade: "高中", category: "力学", purpose: "使用游标卡尺、螺旋测微器测量长度", equipment: ["游标卡尺", "螺旋测微器", "待测物体"], steps: ["1. 选择合适量具", "2. 清洁测量面", "3. 正确卡紧物体", "4. 读数记录", "5. 多次测量求平均"], notes: "螺旋测微器读数需估读；注意零误差" },
+        { name: "验证动量守恒定律", grade: "高中", category: "力学", purpose: "通过碰撞实验验证动量守恒", equipment: ["气垫导轨", "光电门", "滑块", "挡光片", "天平"], steps: ["1. 调节导轨水平", "2. 测量碰撞前后速度", "3. 计算总动量", "4. 比较碰撞前后动量"], notes: "碰撞时系统所受合外力为零；挡光片宽度要准确" },
+        { name: "用单摆测量重力加速度的大小", grade: "高中", category: "力学", purpose: "通过单摆周期公式测 g 值", equipment: ["单摆", "秒表", "刻度尺", "铁架台"], steps: ["1. 构建单摆", "2. 测量摆长", "3. 测量多个周期总时间求周期", "4. 代入公式g=4π²L/T²"], notes: "摆角小于5°；摆长从悬点到球心" },
+        { name: "用常见温度计测量温度", grade: "初中", category: "热学", purpose: "掌握温度计的使用方法", equipment: ["温度计", "烧杯", "热水", "冷水"], steps: ["1. 观察量程分度值", "2. 玻璃泡浸入液体", "3. 待示数稳定读数", "4. 记录温度"], notes: "玻璃泡不能碰容器底或壁；读数时视线与液柱上表面相平" },
+        { name: "探究水在沸腾前后温度变化的特点", grade: "初中", category: "热学", purpose: "观察沸腾现象，记录温度变化", equipment: ["酒精灯", "烧杯", "温度计", "水", "石棉网"], steps: ["1. 安装装置", "2. 加热并记录温度", "3. 观察气泡变化", "4. 绘制温度-时间图象"], notes: "沸腾时继续吸热温度不变；杯口加盖可减少热量散失" },
+        { name: "用油膜法估测油酸分子的大小", grade: "高中", category: "热学", purpose: "通过油膜法估算分子直径", equipment: ["油酸", "酒精", "痱子粉", "量筒", "坐标纸", "浅盘"], steps: ["1. 配制油酸酒精溶液", "2. 浅盘撒痱子粉", "3. 滴入一滴油酸溶液", "4. 测量油膜面积", "5. 计算分子直径"], notes: "油酸酒精溶液浓度要准确；油膜需完全展开" },
+        { name: "探究等温情况下一定质量气体压强与体积的关系", grade: "高中", category: "热学", purpose: "验证玻意耳定律 pV = 常数", equipment: ["注射器", "压强传感器", "计算机", "恒温水槽"], steps: ["1. 调节注射器体积", "2. 记录压强", "3. 保持温度不变", "4. 绘制p-V图象"], notes: "温度恒定；缓慢改变体积" },
+        { name: "探究光的反射定律", grade: "初中", category: "光学", purpose: "验证反射角等于入射角，三线共面", equipment: ["激光笔", "平面镜", "纸板", "量角器"], steps: ["1. 搭建装置", "2. 改变入射角", "3. 测量反射角", "4. 观察三线共面"], notes: "纸板要与镜面垂直；激光不能直射眼睛" },
+        { name: "探究平面镜成像的特点", grade: "初中", category: "光学", purpose: "探究平面镜成像等大、等距、虚像", equipment: ["玻璃板", "蜡烛", "刻度尺", "白纸", "火柴"], steps: ["1. 玻璃板垂直桌面", "2. 点燃蜡烛A", "3. 移动蜡烛B与像重合", "4. 测量物距像距", "5. 比较大小"], notes: "玻璃板要薄且与桌面垂直；环境较暗时现象更明显" },
+        { name: "探究凸透镜成像的规律", grade: "初中", category: "光学", purpose: "探究物距与像距、像的性质关系", equipment: ["光具座", "凸透镜", "蜡烛", "光屏", "火柴"], steps: ["1. 调节共轴", "2. 改变物距", "3. 移动光屏找清晰的像", "4. 记录像距和像的性质"], notes: "透镜焦距已知；物距大于2f成倒立缩小实像" },
+        { name: "测量玻璃的折射率", grade: "高中", category: "光学", purpose: "用插针法测定玻璃折射率", equipment: ["玻璃砖", "白纸", "大头针", "量角器", "铅笔"], steps: ["1. 在白纸上画线", "2. 插两枚大头针确定入射光线", "3. 透过玻璃砖插第三、四枚大头针", "4. 画出射光线", "5. 测量入射角和折射角", "6. 计算n=sin i/sin r"], notes: "大头针要竖直；玻璃砖光学面不能用手摸" },
+        { name: "用双缝干涉实验测量光的波长", grade: "高中", category: "光学", purpose: "通过干涉条纹间距测波长", equipment: ["双缝干涉仪", "激光器", "刻度尺", "光屏"], steps: ["1. 调节仪器", "2. 观察干涉条纹", "3. 测量条纹间距Δx", "4. 已知双缝间距d和缝屏距L", "5. 计算λ=dΔx/L"], notes: "条纹要清晰；测量多个条纹间距求平均" },
+        { name: "用电流表测量电流", grade: "初中", category: "电学", purpose: "学习电流表的使用和读数", equipment: ["电流表", "电源", "灯泡", "开关", "导线"], steps: ["1. 选择合适量程", "2. 电流表串联", "3. 正接正负接负", "4. 闭合开关读数"], notes: "电流表不能直接接电源两极；读数时视线正对刻度" },
+        { name: "用电压表测量电压", grade: "初中", category: "电学", purpose: "学习电压表的使用和读数", equipment: ["电压表", "电源", "灯泡", "开关", "导线"], steps: ["1. 选择量程", "2. 电压表并联", "3. 正接正负接负", "4. 闭合开关读数"], notes: "电压表可接在电源两端；试触选择量程" },
+        { name: "探究电流与电压、电阻的关系", grade: "初中", category: "电学", purpose: "探究欧姆定律 I = U/R", equipment: ["电源", "定值电阻", "滑动变阻器", "电流表", "电压表", "开关", "导线"], steps: ["1. 保持电阻不变改变电压", "2. 记录电流", "3. 保持电压不变改变电阻", "4. 分析I-U和I-R关系"], notes: "滑动变阻器起限流分压作用；实验前开关断开" },
+        { name: "探究串联电路和并联电路中电流、电压的特点", grade: "初中", category: "电学", purpose: "总结串并联电路电流电压规律", equipment: ["电源", "灯泡", "开关", "导线", "电流表", "电压表"], steps: ["1. 搭建串联电路", "2. 测各点电流电压", "3. 搭建并联电路", "4. 测干路支路电流和电压"], notes: "串联电流相等，总电压等于各部分电压之和；并联电压相等，总电流等于各支路电流之和" },
+        { name: "探究通电螺线管外部磁场的方向", grade: "初中", category: "电学", purpose: "用安培定则判断磁场方向", equipment: ["螺线管", "电源", "开关", "导线", "小磁针"], steps: ["1. 连接电路", "2. 小磁针放在螺线管周围", "3. 观察小磁针指向", "4. 改变电流方向重复"], notes: "右手握住螺线管，四指指向电流方向，拇指指向N极" },
+        { name: "探究导体在磁场中运动时产生感应电流的条件", grade: "初中", category: "电学", purpose: "探究电磁感应现象", equipment: ["蹄形磁体", "导体棒", "灵敏电流计", "导线"], steps: ["1. 连接电路", "2. 导体静止观察电流计", "3. 导体切割磁感线", "4. 改变运动方向", "5. 记录感应电流"], notes: "闭合回路部分导体切割磁感线产生感应电流；感应电流方向与运动方向、磁场方向有关" },
+        { name: "观察电容器的充、放电现象", grade: "高中", category: "电学", purpose: "观察电容器充放电过程", equipment: ["电容器", "电阻", "电源", "开关", "电流表", "电压表", "导线"], steps: ["1. 连接充电电路", "2. 观察充电电流变化", "3. 充电完毕断开电源", "4. 连接放电电路", "5. 观察放电电流"], notes: "充电时电流逐渐减小，放电时电流反向并逐渐减小" },
+        { name: "测量金属丝的电阻率", grade: "高中", category: "电学", purpose: "用伏安法测电阻，计算电阻率", equipment: ["螺旋测微器", "电压表", "电流表", "待测金属丝", "刻度尺", "电源", "滑动变阻器"], steps: ["1. 测金属丝直径d", "2. 测长度L", "3. 连接电路测电阻R", "4. 计算电阻率ρ=RS/L"], notes: "选择电流表内接或外接法；测量时金属丝不能通电过久" },
+        { name: "用多用电表测量电学中的物理量", grade: "高中", category: "电学", purpose: "练习使用多用电表测电压、电流、电阻", equipment: ["多用电表", "电阻", "电源", "导线"], steps: ["1. 机械调零", "2. 选择合适档位", "3. 测电压并联", "4. 测电流串联", "5. 测电阻时需断开电路并欧姆调零"], notes: "测电阻前先短接调零；测量中不能带电操作" },
+        { name: "测量电源的电动势和内阻", grade: "高中", category: "电学", purpose: "通过U-I图象测E和r", equipment: ["电源", "电流表", "电压表", "滑动变阻器", "开关", "导线"], steps: ["1. 连接电路", "2. 改变电阻记录多组U、I", "3. 绘制U-I图象", "4. 纵截距为E，斜率为r"], notes: "图象为直线；滑动变阻器阻值由大到小变化" },
+        { name: "探究影响感应电流方向的因素", grade: "高中", category: "电学", purpose: "探究楞次定律", equipment: ["线圈", "磁铁", "灵敏电流计", "导线"], steps: ["1. 连接电路", "2. 磁铁插入线圈", "3. 观察电流计偏转", "4. 磁铁拔出", "5. 改变磁极方向重复"], notes: "感应电流的磁场总是阻碍原磁场的变化" },
+        { name: "探究变压器原、副线圈电压与匝数的关系", grade: "高中", category: "电学", purpose: "验证变压器变压比公式", equipment: ["学生电源", "变压器", "电压表", "导线"], steps: ["1. 连接原副线圈", "2. 原线圈接交流电", "3. 改变匝数比", "4. 测量原副线圈电压", "5. 分析U1/U2=n1/n2"], notes: "使用交流电；铁芯闭合减少漏磁" },
+        { name: "利用传感器制作简单的自动控制装置", grade: "高中", category: "电学", purpose: "设计光控或温控电路", equipment: ["光敏电阻/热敏电阻", "继电器", "LED", "电源", "电阻", "导线"], steps: ["1. 选择传感器", "2. 搭建控制电路", "3. 调节阈值", "4. 测试功能", "5. 优化灵敏度"], notes: "传感器将非电量转换为电信号；继电器起开关作用" }
+    ];
+
+    // 全局状态
+    let currentUser = null;
+    let currentPage = "home";
+    let currentExpId = null;
+    let carouselIndex = 0;
+    let carouselInterval;
+    const carouselSlides = [
+        { title: "力学世界", desc: "探索牛顿定律与运动规律，从基础测量到动量守恒", img: "https://picsum.photos/id/163/1200/600" },
+        { title: "热学奥秘", desc: "温度与热传递，分子动理论与气体定律", img: "https://picsum.photos/id/29/1200/600" },
+        { title: "光学奇境", desc: "光的反射折射，干涉衍射，探索成像规律", img: "https://picsum.photos/id/1/1200/600" },
+        { title: "电学磁场", desc: "电路分析，电磁感应，传感器应用", img: "https://picsum.photos/id/4/1200/600" }
+    ];
+
+    // 邮箱格式验证函数
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    function validateLoginEmail() {
+        const emailInput = document.getElementById("loginEmail");
+        const icon = document.getElementById("loginEmailIcon");
+        const msgDiv = document.getElementById("loginEmailMsg");
+        if (!emailInput) return;
+        const email = emailInput.value.trim();
+        if (email === "") {
+            icon.style.display = "none";
+            msgDiv.classList.remove("show");
+            return false;
+        }
+        if (isValidEmail(email)) {
+            icon.style.display = "inline-block";
+            icon.className = "input-icon";
+            icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            msgDiv.classList.remove("show");
+            return true;
+        } else {
+            icon.style.display = "inline-block";
+            icon.className = "input-icon error";
+            icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            msgDiv.innerHTML = "请输入有效的邮箱地址（例如：name@example.com）";
+            msgDiv.classList.add("show");
+            return false;
+        }
+    }
+
+    function validateRegEmail() {
+        const emailInput = document.getElementById("regEmail");
+        const icon = document.getElementById("regEmailIcon");
+        const msgDiv = document.getElementById("regEmailMsg");
+        if (!emailInput) return false;
+        const email = emailInput.value.trim();
+        if (email === "") {
+            icon.style.display = "none";
+            msgDiv.classList.remove("show");
+            return false;
+        }
+        if (isValidEmail(email)) {
+            icon.style.display = "inline-block";
+            icon.className = "input-icon";
+            icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            msgDiv.classList.remove("show");
+            return true;
+        } else {
+            icon.style.display = "inline-block";
+            icon.className = "input-icon error";
+            icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            msgDiv.innerHTML = "请输入有效的邮箱地址（例如：name@example.com）";
+            msgDiv.classList.add("show");
+            return false;
+        }
+    }
+
+    function saveUsers(users) { localStorage.setItem("physics_users", JSON.stringify(users)); }
+    function getUsers() { return JSON.parse(localStorage.getItem("physics_users") || "[]"); }
+    function saveCurrentUser(user) { localStorage.setItem("physics_currentUser", JSON.stringify(user)); currentUser = user; }
+    function loadCurrentUser() { return JSON.parse(localStorage.getItem("physics_currentUser")); }
+
+    function updateUILoginState() {
+        const userNameSpan = document.getElementById("userNameDisplay");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const avatarDiv = document.getElementById("userAvatar");
+        if (currentUser) {
+            userNameSpan.innerText = currentUser.displayName || currentUser.email.split('@')[0];
+            logoutBtn.style.display = "inline-block";
+            if (currentUser.avatar) avatarDiv.innerHTML = `<img src="${currentUser.avatar}" alt="avatar">`;
+            else avatarDiv.innerHTML = `<i class="fas fa-user"></i>`;
+        } else {
+            userNameSpan.innerText = "未登录";
+            logoutBtn.style.display = "none";
+            avatarDiv.innerHTML = `<i class="fas fa-user"></i>`;
+        }
+    }
+
+    function closeAuthModal() {
+        document.getElementById("authModal").style.display = "none";
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderPage(page, expId = null) {
+        currentPage = page;
+        currentExpId = expId;
+        const container = document.getElementById("appContent");
+        if (page === "home") renderHome(container);
+        else if (page === "experiments") renderExperiments(container);
+        else if (page === "experiment" && expId !== null) renderExperimentDetail(container, expId);
+        else if (page === "profile") {
+            if (!currentUser) {
+                document.getElementById("authModal").style.display = "flex";
+                return;
+            }
+            renderProfile(container);
+        }
+        else if (page === "settings") {
+            if (!currentUser) {
+                document.getElementById("authModal").style.display = "flex";
+                return;
+            }
+            renderSettings(container);
+        }
+        document.querySelectorAll("[data-page]").forEach(link => {
+            if (page === "experiment") link.classList.remove("active");
+            else if (link.dataset.page === page) link.classList.add("active");
+            else link.classList.remove("active");
+        });
+        document.getElementById("mobileMenu").classList.remove("open");
+        scrollToTop();
+    }
+
+    function renderHome(container) {
+        container.innerHTML = `
+            <div class="carousel-container" id="carouselMain">
+                <div class="carousel-slides" id="carouselSlides"></div>
+                <button class="carousel-btn carousel-prev" id="prevSlide">‹</button>
+                <button class="carousel-btn carousel-next" id="nextSlide">›</button>
+                <div class="carousel-dots" id="carouselDots"></div>
+            </div>
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> 欢迎使用物理实验系统</h2>
+                <p style="margin-top:0.5rem;">本系统提供42个精选物理实验，涵盖力学、热学、光学、电学，支持初中/高中分类筛选。点击实验卡片查看详细器材、步骤和注意事项。</p>
+                <div style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:1.5rem;">
+                    <div><i class="fas fa-check-circle" style="color:var(--primary);"></i> 力热光电全覆盖</div>
+                    <div><i class="fas fa-chalkboard-user"></i> 详细实验指导</div>
+                    <div><i class="fas fa-palette"></i> 深色主题护眼</div>
+                </div>
+            </div>
+            <section class="slogan-section"><div><blockquote><p>“实验是检验真理的唯一标准。每一次测量，都是与宇宙的一次对话。”</p><footer>— 物理实验室 · 实验精神</footer></blockquote><p>※ 格物致知，动手求真</p></div></section>
+            <section class="store-section"><div class="store-flex"><div class="store-img"></div><div class="store-info"><h2>🔬 动手实验工坊 · 限时开放</h2><p>亲手操作单摆、凸透镜成像、静电起电机等经典实验装置。专业导师指导，带你从现象理解物理定律。</p><a href="#" class="btn-outline" id="gotoExperimentsBtn">前往实验中心 →</a></div></div></section>
+            <section class="products-section"><h2>🧪 实验套件 · 科学探索包</h2><div class="products-grid"><div class="product-card"><img src="https://picsum.photos/id/20/400/400" alt="单摆"><h3>单摆周期实验</h3><p>研究摆长与周期关系</p></div><div class="product-card"><img src="https://picsum.photos/id/29/400/400" alt="热传导"><h3>热传导对比仪</h3><p>金属棒蜡块熔化实验</p></div><div class="product-card"><img src="https://picsum.photos/id/1/400/400" alt="光学"><h3>几何光学实验箱</h3><p>观察折射与聚焦</p></div><div class="product-card"><img src="https://picsum.photos/id/4/400/400" alt="电磁"><h3>法拉第电磁感应</h3><p>磁铁抽插线圈点亮LED</p></div></div></section>
+        `;
+        initCarousel();
+        const gotoBtn = document.getElementById("gotoExperimentsBtn");
+        if (gotoBtn) gotoBtn.addEventListener("click", (e) => { e.preventDefault(); renderPage("experiments"); });
+    }
+
+    function initCarousel() {
+        const slidesContainer = document.getElementById("carouselSlides");
+        const dotsContainer = document.getElementById("carouselDots");
+        if (!slidesContainer) return;
+        slidesContainer.innerHTML = ""; dotsContainer.innerHTML = "";
+        carouselSlides.forEach((slide, idx) => {
+            const slideDiv = document.createElement("div");
+            slideDiv.className = "carousel-slide";
+            if (idx === 0) slideDiv.classList.add("active");
+            slideDiv.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${slide.img})`;
+            slideDiv.innerHTML = `<div class="carousel-caption"><h3>${slide.title}</h3><p>${slide.desc}</p></div>`;
+            slidesContainer.appendChild(slideDiv);
+            const dot = document.createElement("span");
+            dot.className = "dot" + (idx === 0 ? " active" : "");
+            dot.addEventListener("click", () => goToSlide(idx));
+            dotsContainer.appendChild(dot);
+        });
+        const prevBtn = document.getElementById("prevSlide");
+        const nextBtn = document.getElementById("nextSlide");
+        if (prevBtn) prevBtn.onclick = () => changeSlide(-1);
+        if (nextBtn) nextBtn.onclick = () => changeSlide(1);
+        function changeSlide(delta) { let newIdx = carouselIndex + delta; if (newIdx < 0) newIdx = carouselSlides.length - 1; if (newIdx >= carouselSlides.length) newIdx = 0; goToSlide(newIdx); }
+        function goToSlide(idx) { const slides = document.querySelectorAll(".carousel-slide"); const dots = document.querySelectorAll(".dot"); slides.forEach((s,i)=>s.classList.toggle("active",i===idx)); dots.forEach((d,i)=>d.classList.toggle("active",i===idx)); carouselIndex = idx; }
+        function startAuto() { if (carouselInterval) clearInterval(carouselInterval); carouselInterval = setInterval(()=>changeSlide(1),5000); }
+        function stopAuto() { if (carouselInterval) clearInterval(carouselInterval); }
+        const carouselContainer = document.getElementById("carouselMain");
+        if (carouselContainer) { carouselContainer.addEventListener("mouseenter", stopAuto); carouselContainer.addEventListener("mouseleave", startAuto); }
+        startAuto();
+    }
+
+    function renderExperiments(container) {
+        container.innerHTML = `
+            <div class="card">
+                <h2 class="section-title"><i class="fas fa-list"></i> 实验列表</h2>
+                <div class="filter-bar">
+                    <select id="gradeFilter"><option value="">所有年级</option><option>初中</option><option>高中</option></select>
+                    <select id="categoryFilter"><option value="">所有类别</option><option>力学</option><option>热学</option><option>光学</option><option>电学</option></select>
+                    <input type="text" id="keywordFilter" placeholder="搜索实验名称...">
+                    <button class="btn" id="searchBtn">筛选</button>
+                </div>
+                <div id="experimentsGrid" class="experiments-grid"></div>
+            </div>
+        `;
+        const grid = document.getElementById("experimentsGrid");
+        function filterAndRender() {
+            const grade = document.getElementById("gradeFilter").value;
+            const category = document.getElementById("categoryFilter").value;
+            const keyword = document.getElementById("keywordFilter").value.toLowerCase();
+            const filtered = allExperiments.filter(exp => { if (grade && exp.grade !== grade) return false; if (category && exp.category !== category) return false; if (keyword && !exp.name.toLowerCase().includes(keyword)) return false; return true; });
+            grid.innerHTML = filtered.map((exp, idx) => `<div class="exp-card" onclick="goToExperiment(${allExperiments.indexOf(exp)})"><div class="exp-title">${escapeHtml(exp.name)}</div><div class="exp-meta"><span>${exp.grade}</span><span>${exp.category}</span></div><div class="exp-purpose">${exp.purpose}</div></div>`).join("");
+        }
+        document.getElementById("searchBtn").onclick = filterAndRender;
+        filterAndRender();
+    }
+
+    // 修改 goToExperiment：未登录时弹出登录框
+    window.goToExperiment = function(expId) {
+        if (!currentUser) {
+            document.getElementById("authModal").style.display = "flex";
+            return;
+        }
+        renderPage("experiment", expId);
+    };
+
+    function startLengthTimeAnimation() {
+        const canvas = document.getElementById("animationCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        let width = canvas.clientWidth;
+        let height = canvas.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        let sliderX = 50;
+        let isDragging = false;
+        let animationTime = 0;
+        let timerRunning = false;
+        let timerInterval = null;
+
+        function drawRuler() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
+            ctx.fillRect(0, 0, w, h);
+            const rulerY = h * 0.6;
+            const rulerStartX = 50;
+            const rulerEndX = w - 50;
+            const rulerLength = rulerEndX - rulerStartX;
+            ctx.beginPath();
+            ctx.moveTo(rulerStartX, rulerY);
+            ctx.lineTo(rulerEndX, rulerY);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#333";
+            ctx.stroke();
+            const numTicks = 20;
+            for (let i = 0; i <= numTicks; i++) {
+                const x = rulerStartX + (i / numTicks) * rulerLength;
+                const isMajor = i % 5 === 0;
+                const tickHeight = isMajor ? 15 : 8;
+                ctx.beginPath();
+                ctx.moveTo(x, rulerY);
+                ctx.lineTo(x, rulerY - tickHeight);
+                ctx.stroke();
+                if (isMajor) {
+                    ctx.fillStyle = "#333";
+                    ctx.font = "12px Arial";
+                    ctx.fillText((i / numTicks * 10).toFixed(1) + "cm", x - 10, rulerY - 18);
+                }
+            }
+            ctx.fillStyle = "#e6a157";
+            ctx.fillRect(sliderX - 10, rulerY - 25, 20, 30);
+            ctx.fillStyle = "#2c2418";
+            ctx.font = "bold 14px Arial";
+            const lengthCm = ((sliderX - rulerStartX) / rulerLength * 10).toFixed(1);
+            ctx.fillText(lengthCm + " cm", sliderX - 15, rulerY - 30);
+            const stopwatchX = w - 120;
+            const stopwatchY = 30;
+            ctx.beginPath();
+            ctx.arc(stopwatchX, stopwatchY, 30, 0, 2 * Math.PI);
+            ctx.fillStyle = "#f0f0f0";
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#333";
+            ctx.font = "bold 16px monospace";
+            const seconds = (animationTime % 60).toFixed(1);
+            ctx.fillText(seconds + " s", stopwatchX - 20, stopwatchY + 6);
+            ctx.fillStyle = timerRunning ? "#e74c3c" : "#2ecc71";
+            ctx.fillRect(stopwatchX - 20, stopwatchY + 20, 40, 20);
+            ctx.fillStyle = "white";
+            ctx.font = "10px Arial";
+            ctx.fillText(timerRunning ? "停止" : "开始", stopwatchX - 12, stopwatchY + 34);
+        }
+
+        function updateSliderPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            let clientX;
+            if (e.touches) clientX = e.touches[0].clientX;
+            else clientX = e.clientX;
+            let mouseX = (clientX - rect.left) * scaleX;
+            mouseX = Math.min(Math.max(mouseX, 50), canvas.width - 50);
+            sliderX = mouseX;
+            drawRuler();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => { if (timerRunning) { animationTime += 0.1; drawRuler(); } }, 100);
+        }
+        function stopTimer() { if (timerInterval) clearInterval(timerInterval); timerInterval = null; }
+
+        canvas.addEventListener("mousedown", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const rulerY = canvas.height * 0.6;
+            if (Math.abs(mouseX - sliderX) < 20 && e.clientY - rect.top > rulerY - 40 && e.clientY - rect.top < rulerY) { isDragging = true; canvas.style.cursor = "grabbing"; e.preventDefault(); }
+            const stopwatchX = canvas.width - 120;
+            const stopwatchY = 30;
+            if (Math.hypot(mouseX - stopwatchX, (e.clientY - rect.top) - stopwatchY) < 30) { timerRunning = !timerRunning; if (timerRunning) startTimer(); else stopTimer(); drawRuler(); }
+        });
+        window.addEventListener("mousemove", (e) => { if (isDragging) updateSliderPosition(e); });
+        window.addEventListener("mouseup", () => { isDragging = false; canvas.style.cursor = "default"; });
+        canvas.addEventListener("touchstart", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const scaleX = canvas.width / rect.width;
+            const touchX = (touch.clientX - rect.left) * scaleX;
+            const rulerY = canvas.height * 0.6;
+            if (Math.abs(touchX - sliderX) < 20 && touch.clientY - rect.top > rulerY - 40 && touch.clientY - rect.top < rulerY) { isDragging = true; e.preventDefault(); }
+            const stopwatchX = canvas.width - 120;
+            const stopwatchY = 30;
+            if (Math.hypot(touchX - stopwatchX, (touch.clientY - rect.top) - stopwatchY) < 30) { timerRunning = !timerRunning; if (timerRunning) startTimer(); else stopTimer(); drawRuler(); }
+        });
+        canvas.addEventListener("touchmove", (e) => { if (isDragging) { updateSliderPosition(e); e.preventDefault(); } });
+        canvas.addEventListener("touchend", () => { isDragging = false; });
+        drawRuler();
+        startTimer();
+    }
+
+    function renderExperimentDetail(container, expId) {
+        const exp = allExperiments[expId];
+        if (!exp) { renderPage("experiments"); return; }
+        let animationHtml = "";
+        if (exp.name === "用刻度尺测量长度，用表测量时间") {
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="animationCanvas" width="600" height="300" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><p style="margin-top:0.8rem;">👆 拖动橙色滑块测量长度，点击秒表按钮开始/停止计时</p></div>`;
+        }
+        container.innerHTML = `
+            <div class="breadcrumb">
+                <a href="#" onclick="renderPage('home'); return false;">首页</a>
+                <span class="separator">></span>
+                <a href="#" onclick="renderPage('experiments'); return false;">实验列表</a>
+                <span class="separator">></span>
+                <span class="current">${escapeHtml(exp.name)}</span>
+            </div>
+            <div class="card">
+                <div class="exp-detail-header"><h1 class="exp-detail-title">${escapeHtml(exp.name)}</h1><div class="exp-detail-meta"><span class="exp-meta" style="background:var(--primary); color:white; padding:4px 12px; border-radius:20px;">${exp.grade}</span><span class="exp-meta" style="background:var(--primary); color:white; padding:4px 12px; border-radius:20px;">${exp.category}</span></div></div>
+                ${animationHtml}
+                <div class="exp-detail-section"><h3><i class="fas fa-bullseye"></i> 实验目的</h3><p>${escapeHtml(exp.purpose)}</p></div>
+                <div class="exp-detail-section"><h3><i class="fas fa-tools"></i> 实验器材</h3><ul>${exp.equipment.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul></div>
+                <div class="exp-detail-section"><h3><i class="fas fa-list-ol"></i> 实验步骤</h3><ol>${exp.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol></div>
+                <div class="exp-detail-section"><h3><i class="fas fa-exclamation-triangle"></i> 注意事项</h3><p>${escapeHtml(exp.notes)}</p></div>
+                <a href="#" class="back-to-list" onclick="renderPage('experiments'); return false;"><i class="fas fa-arrow-left"></i> 返回实验列表</a>
+            </div>
+        `;
+        if (exp.name === "用刻度尺测量长度，用表测量时间") { setTimeout(() => startLengthTimeAnimation(), 100); }
+    }
+
+    function renderProfile(container) {
+        const user = currentUser || { displayName: "", email: "", school: "", major: "", avatar: "" };
+        container.innerHTML = `
+            <div class="card">
+                <h2 class="section-title"><i class="fas fa-user-circle"></i> 个人信息</h2>
+                <div class="profile-form">
+                    <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('avatarFile').click()">${user.avatar ? `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-camera" style="font-size:2rem;"></i>'}</div>
+                    <input type="file" id="avatarFile" accept="image/*" style="display:none;">
+                    <div class="form-group"><label>用户名</label><input type="text" id="profileName" value="${escapeHtml(user.displayName || '')}"></div>
+                    <div class="form-group"><label>邮箱</label><input type="email" id="profileEmail" value="${escapeHtml(user.email || '')}" readonly></div>
+                    <div class="form-group"><label>学校</label><input type="text" id="profileSchool" value="${escapeHtml(user.school || '')}"></div>
+                    <div class="form-group"><label>专业/年级</label><input type="text" id="profileMajor" value="${escapeHtml(user.major || '')}"></div>
+                    <button class="btn" id="saveProfileBtn">保存信息</button>
+                </div>
+                <div class="password-section"><h3><i class="fas fa-lock"></i> 修改密码</h3><div class="password-grid"><label>当前密码</label><input type="password" id="oldPwd" placeholder="请输入当前密码"><label>新密码</label><input type="password" id="newPwd" placeholder="至少6位"><label>确认新密码</label><input type="password" id="confirmPwd" placeholder="再次输入新密码"></div><div class="password-actions"><button class="btn" id="changePwdBtn">确认修改</button></div></div>
+            </div>
+        `;
+        const avatarFile = document.getElementById("avatarFile");
+        avatarFile.onchange = (e) => { const file = e.target.files[0]; if(file){ const reader = new FileReader(); reader.onload = (ev) => { const preview = document.getElementById("avatarPreview"); preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;">`; if(currentUser) currentUser.avatar = ev.target.result; saveCurrentUser(currentUser); updateUILoginState(); const users = getUsers(); const idx = users.findIndex(u=>u.email===currentUser.email); if(idx!==-1){ users[idx].avatar=ev.target.result; saveUsers(users); } }; reader.readAsDataURL(file); } };
+        document.getElementById("saveProfileBtn").onclick = () => { if(!currentUser) return; currentUser.displayName = document.getElementById("profileName").value; currentUser.school = document.getElementById("profileSchool").value; currentUser.major = document.getElementById("profileMajor").value; saveCurrentUser(currentUser); const users = getUsers(); const idx = users.findIndex(u=>u.email===currentUser.email); if(idx!==-1){ users[idx]=currentUser; saveUsers(users); } updateUILoginState(); alert("信息已更新"); };
+        document.getElementById("changePwdBtn").onclick = () => { const old = document.getElementById("oldPwd").value; const newp = document.getElementById("newPwd").value; const confirm = document.getElementById("confirmPwd").value; if(!old || !newp){ alert("请填写完整"); return; } if(newp !== confirm){ alert("新密码不一致"); return; } if(newp.length<6){ alert("密码至少6位"); return; } if(btoa(old) !== currentUser.password){ alert("当前密码错误"); return; } currentUser.password = btoa(newp); saveCurrentUser(currentUser); const users = getUsers(); const idx = users.findIndex(u=>u.email===currentUser.email); if(idx!==-1){ users[idx].password = btoa(newp); saveUsers(users); } alert("密码修改成功，请重新登录"); logout(); };
+    }
+
+    function renderSettings(container) {
+        const isDark = document.body.classList.contains("dark");
+        container.innerHTML = `<div class="card"><h2 class="section-title"><i class="fas fa-cog"></i> 系统设置</h2><div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;"><span>深色主题</span><label><input type="checkbox" id="themeToggle" ${isDark ? "checked" : ""}> 开启</label></div><div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;"><span>字体大小</span><select id="fontSizeSelect"><option value="small">小</option><option value="medium" selected>中</option><option value="large">大</option></select></div><div style="margin-top:1.5rem; display:flex; gap:1rem;"><button class="btn" id="backupBtn">备份数据</button><button class="btn" id="restoreBtn">恢复数据</button></div></div>`;
+        document.getElementById("themeToggle").onchange = (e) => { if(e.target.checked) document.body.classList.add("dark"); else document.body.classList.remove("dark"); localStorage.setItem("theme", e.target.checked ? "dark" : "light"); };
+        const fontSizeSelect = document.getElementById("fontSizeSelect");
+        const savedFont = localStorage.getItem("fontSize") || "medium";
+        fontSizeSelect.value = savedFont;
+        fontSizeSelect.onchange = (e) => { const size = e.target.value; document.documentElement.style.fontSize = size === "small" ? "14px" : size === "large" ? "18px" : "16px"; localStorage.setItem("fontSize", size); };
+        document.getElementById("backupBtn").onclick = () => { const data = { users: getUsers(), currentUser, theme: localStorage.getItem("theme"), fontSize: localStorage.getItem("fontSize") }; const blob = new Blob([JSON.stringify(data)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "physics_backup.json"; a.click(); URL.revokeObjectURL(url); };
+        document.getElementById("restoreBtn").onclick = () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/json"; input.onchange = (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = (ev) => { try { const data = JSON.parse(ev.target.result); if(data.users) localStorage.setItem("physics_users", JSON.stringify(data.users)); if(data.currentUser) localStorage.setItem("physics_currentUser", JSON.stringify(data.currentUser)); if(data.theme) localStorage.setItem("theme", data.theme); if(data.fontSize) localStorage.setItem("fontSize", data.fontSize); alert("恢复成功，页面将刷新"); location.reload(); } catch(e){ alert("恢复失败"); } }; reader.readAsText(file); }; input.click(); };
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function login() {
+        const email = document.getElementById("loginEmail").value.trim();
+        const pwd = document.getElementById("loginPassword").value;
+        if (!isValidEmail(email)) {
+            document.getElementById("authError").innerText = "请输入有效的邮箱地址";
+            document.getElementById("authError").style.display = "block";
+            return;
+        }
+        const users = getUsers();
+        const user = users.find(u => u.email === email && u.password === btoa(pwd));
+        if (user) {
+            saveCurrentUser(user);
+            closeAuthModal();
+            updateUILoginState();
+            renderPage(currentPage, currentExpId);
+        } else {
+            document.getElementById("authError").innerText = "邮箱或密码错误";
+            document.getElementById("authError").style.display = "block";
+        }
+    }
+
+    function register() {
+        const name = document.getElementById("regName").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const pwd = document.getElementById("regPassword").value;
+        if (!name || !email || pwd.length < 6) {
+            document.getElementById("authError").innerText = "请完整填写，用户名、邮箱和密码（至少6位）";
+            document.getElementById("authError").style.display = "block";
+            return;
+        }
+        if (!isValidEmail(email)) {
+            document.getElementById("authError").innerText = "请输入有效的邮箱地址";
+            document.getElementById("authError").style.display = "block";
+            return;
+        }
+        const users = getUsers();
+        if (users.find(u => u.email === email)) {
+            document.getElementById("authError").innerText = "邮箱已存在";
+            document.getElementById("authError").style.display = "block";
+            return;
+        }
+        const newUser = { email, password: btoa(pwd), displayName: name, school: "", major: "", avatar: null };
+        users.push(newUser);
+        saveUsers(users);
+        saveCurrentUser(newUser);
+        closeAuthModal();
+        updateUILoginState();
+        renderPage("home");
+    }
+
+    function toggleAuthMode() {
+        const loginDiv = document.getElementById("loginForm");
+        const regDiv = document.getElementById("registerForm");
+        loginDiv.style.display = loginDiv.style.display === "none" ? "block" : "none";
+        regDiv.style.display = regDiv.style.display === "none" ? "block" : "none";
+        document.getElementById("authError").style.display = "none";
+        const loginEmail = document.getElementById("loginEmail");
+        const regEmail = document.getElementById("regEmail");
+        if (loginEmail) loginEmail.value = "";
+        if (regEmail) regEmail.value = "";
+        if (document.getElementById("loginEmailIcon")) document.getElementById("loginEmailIcon").style.display = "none";
+        if (document.getElementById("regEmailIcon")) document.getElementById("regEmailIcon").style.display = "none";
+        if (document.getElementById("loginEmailMsg")) document.getElementById("loginEmailMsg").classList.remove("show");
+        if (document.getElementById("regEmailMsg")) document.getElementById("regEmailMsg").classList.remove("show");
+    }
+
+    function logout(e) {
+        if (e) e.stopPropagation();
+        localStorage.removeItem("physics_currentUser");
+        currentUser = null;
+        updateUILoginState();
+        closeAuthModal();
+        renderPage("home");
+    }
+
+    function bindEmailValidation() {
+        const loginEmailInput = document.getElementById("loginEmail");
+        const regEmailInput = document.getElementById("regEmail");
+        if (loginEmailInput) {
+            loginEmailInput.addEventListener("input", validateLoginEmail);
+            loginEmailInput.addEventListener("blur", validateLoginEmail);
+        }
+        if (regEmailInput) {
+            regEmailInput.addEventListener("input", validateRegEmail);
+            regEmailInput.addEventListener("blur", validateRegEmail);
+        }
+    }
+
+    document.getElementById("backToTopBtn").addEventListener("click", scrollToTop);
+
+    function init() {
+        const stored = loadCurrentUser();
+        if (stored) { currentUser = stored; updateUILoginState(); }
+        else { currentUser = null; updateUILoginState(); }
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") document.body.classList.add("dark");
+        const savedFont = localStorage.getItem("fontSize");
+        if (savedFont) document.documentElement.style.fontSize = savedFont === "small" ? "14px" : savedFont === "large" ? "18px" : "16px";
         
-        <div class="main-content">
-            <div class="sidebar">
-                <h2 class="section-title"><i class="fas fa-filter"></i> 筛选条件</h2>
-                
-                <div class="form-group">
-                    <label for="grade-filter"><i class="fas fa-school"></i> 年级</label>
-                    <select id="grade-filter">
-                        <option value="">全部年级</option>
-                        <option value="初中">初中物理</option>
-                        <option value="高中">高中物理</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="type-filter"><i class="fas fa-tags"></i> 实验类型</label>
-                    <select id="type-filter">
-                        <option value="">全部类型</option>
-                        <option value="测量类">测量类</option>
-                        <option value="探究类">探究类</option>
-                        <option value="必修部分">必修部分</option>
-                        <option value="选择性必修部分">选择性必修部分</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="keyword-search"><i class="fas fa-search"></i> 关键词搜索</label>
-                    <input type="text" id="keyword-search" placeholder="输入实验名称或关键词...">
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-primary" onclick="searchExperiments()">
-                        <i class="fas fa-search"></i> 搜索实验
-                    </button>
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-warning" onclick="resetFilters()">
-                        <i class="fas fa-redo"></i> 重置筛选
-                    </button>
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-success" onclick="exportData()">
-                        <i class="fas fa-file-export"></i> 导出数据
-                    </button>
-                </div>
-                
-                <div class="api-section">
-                    <h3 class="section-title"><i class="fas fa-code"></i> API接口</h3>
-                    <div class="api-endpoint">
-                        <span class="api-method get-method">GET</span>
-                        <strong>/api/experiments</strong><br>
-                        获取所有实验数据
-                    </div>
-                    <div class="api-endpoint">
-                        <span class="api-method get-method">GET</span>
-                        <strong>/api/experiments/:id</strong><br>
-                        获取特定实验详情
-                    </div>
-                    <div class="api-endpoint">
-                        <span class="api-method get-method">GET</span>
-                        <strong>/api/stats</strong><br>
-                        获取统计信息
-                    </div>
-                </div>
-            </div>
-            
-            <div class="content">
-                <h2 class="section-title"><i class="fas fa-chart-bar"></i> 实验统计</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="total-count">加载中...</div>
-                        <div class="stat-label">总实验数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="junior-count">加载中...</div>
-                        <div class="stat-label">初中实验</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="senior-count">加载中...</div>
-                        <div class="stat-label">高中实验</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="measuring-count">加载中...</div>
-                        <div class="stat-label">测量类实验</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="exploring-count">加载中...</div>
-                        <div class="stat-label">探究类实验</div>
-                    </div>
-                </div>
-                
-                <div class="tabs">
-                    <div class="tab active" onclick="switchTab('all')">全部实验</div>
-                    <div class="tab" onclick="switchTab('junior')">初中物理</div>
-                    <div class="tab" onclick="switchTab('senior')">高中物理</div>
-                </div>
-                
-                <div id="experiments-container">
-                    <div class="loading">
-                        <i class="fas fa-spinner"></i>
-                        <h3>正在加载实验数据...</h3>
-                        <p>加载初中物理（21个） + 高中物理（21个）</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 实验详情模态框 -->
-    <div id="experiment-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <div id="modal-body">
-                <!-- 模态框内容将通过JavaScript动态生成 -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 实验数据 - 包含初中物理21个和高中物理21个
-        const experiments = [
-            // 初中物理测量类实验 (9个)
-            {
-                id: 1,
-                name: "用刻度尺测量长度，用表测量时间",
-                grade: "初中",
-                type: "测量类",
-                subject: "力学",
-                purpose: "学习使用刻度尺测量长度，学会使用停表测量时间",
-                equipment: ["刻度尺", "停表", "待测物体"],
-                steps: [
-                    "认识刻度尺的零刻度线、量程、分度值",
-                    "测量物体长度，记录数据",
-                    "使用停表测量时间间隔",
-                    "多次测量求平均值，减小误差"
-                ],
-                formulas: ["平均值 = (测量值₁ + 测量值₂ + ... + 测量值ₙ)/n"],
-                notes: "测量时要估读到分度值的下一位，多次测量取平均值减小误差"
-            },
-            {
-                id: 2,
-                name: "用弹簧测力计测量力",
-                grade: "初中",
-                type: "测量类",
-                subject: "力学",
-                purpose: "学习使用弹簧测力计测量力的大小",
-                equipment: ["弹簧测力计", "钩码", "待测物体"],
-                steps: [
-                    "检查弹簧测力计指针是否指零",
-                    "测量前轻轻拉动挂钩，防止卡住",
-                    "测量时沿弹簧轴线方向施力",
-                    "读数时视线与刻度盘垂直",
-                    "记录测量结果"
-                ],
-                formulas: ["F = k·x (胡克定律)"],
-                notes: "使用前要校零，测量时要沿轴线方向施力，读数时视线要垂直刻度盘"
-            },
-            {
-                id: 3,
-                name: "用托盘天平测量物体的质量",
-                grade: "初中",
-                type: "测量类",
-                subject: "力学",
-                purpose: "学习使用托盘天平测量物体的质量",
-                equipment: ["托盘天平", "砝码", "镊子", "待测物体"],
-                steps: [
-                    "将天平放在水平台上",
-                    "调节横梁平衡螺母，使指针指在分度盘中央",
-                    "左盘放物体，右盘放砝码",
-                    "先大后小，最后移动游码直至天平平衡",
-                    "记录测量结果：m物 = m砝码 + m游码"
-                ],
-                formulas: ["m物 = m砝码 + m游码"],
-                notes: "左物右码，砝码要用镊子夹取，潮湿物品要用容器盛放"
-            },
-            {
-                id: 4,
-                name: "用常见温度计测量温度",
-                grade: "初中",
-                type: "测量类",
-                subject: "热学",
-                purpose: "学习使用温度计测量物体的温度",
-                equipment: ["温度计", "热水", "冷水", "待测液体"],
-                steps: [
-                    "观察温度计的量程和分度值",
-                    "测量前估计被测物体的温度",
-                    "温度计的玻璃泡全部浸入被测液体中",
-                    "等待示数稳定后读数",
-                    "读数时温度计仍留在被测液体中"
-                ],
-                formulas: ["T(℃) = 读数"],
-                notes: "温度计玻璃泡不能碰到容器底或壁，读数时视线要与液柱上表面相平"
-            },
-            {
-                id: 5,
-                name: "用电流表测量电流",
-                grade: "初中",
-                type: "测量类",
-                subject: "电学",
-                purpose: "学习使用电流表测量电路中的电流",
-                equipment: ["电流表", "电源", "开关", "小灯泡", "导线"],
-                steps: [
-                    "检查电流表指针是否指零",
-                    "确认量程和分度值",
-                    "电流表串联在电路中",
-                    "正进负出连接",
-                    "接通电路，读取示数",
-                    "断开开关，记录数据"
-                ],
-                formulas: ["I = Q/t"],
-                notes: "电流表串联在电路中，绝对不允许直接接在电源两极上"
-            },
-            {
-                id: 6,
-                name: "用电压表测量电压",
-                grade: "初中",
-                type: "测量类",
-                subject: "电学",
-                purpose: "学习使用电压表测量电路两端的电压",
-                equipment: ["电压表", "电源", "开关", "小灯泡", "导线"],
-                steps: [
-                    "检查电压表指针是否指零",
-                    "确认量程和分度值",
-                    "电压表并联在被测电路两端",
-                    "正进负出连接",
-                    "接通电路，读取示数",
-                    "断开开关，记录数据"
-                ],
-                formulas: ["U = W/Q"],
-                notes: "电压表并联在电路中，可以直接接在电源两极测量电源电压"
-            },
-            {
-                id: 7,
-                name: "测量物体运动的速度",
-                grade: "初中",
-                type: "测量类",
-                subject: "力学",
-                purpose: "测量物体运动的平均速度",
-                equipment: ["刻度尺", "秒表", "小车", "斜面"],
-                steps: [
-                    "将斜面放置在水平桌面上",
-                    "测量斜面长度s",
-                    "让小车从斜面顶端滑到底端，用秒表测量时间t",
-                    "重复测量三次，求平均值",
-                    "计算平均速度v=s/t"
-                ],
-                formulas: ["v=s/t"],
-                notes: "注意计时的准确性，多次测量求平均值减小误差"
-            },
-            {
-                id: 8,
-                name: "测量水平运动物体所受的滑动摩擦力",
-                grade: "初中",
-                type: "测量类",
-                subject: "力学",
-                purpose: "测量物体在水平面上运动时受到的滑动摩擦力",
-                equipment: ["弹簧测力计", "木块", "木板", "钩码"],
-                steps: [
-                    "将木块放在水平木板上",
-                    "用弹簧测力计水平匀速拉动木块",
-                    "读取弹簧测力计的示数",
-                    "在木块上增加钩码，重复实验",
-                    "记录不同压力下的摩擦力"
-                ],
-                formulas: ["f = μN"],
-                notes: "必须匀速拉动木块，使拉力等于摩擦力"
-            },
-            {
-                id: 9,
-                name: "测量固体和液体的密度",
-                grade: "初中",
-                type: "测量类",
-                subject: "力学",
-                purpose: "测量固体和液体的密度",
-                equipment: ["天平", "量筒", "待测固体", "待测液体", "细线", "水"],
-                steps: [
-                    "用天平测量固体质量m₁",
-                    "在量筒中加入适量水，读出体积V₁",
-                    "用细线系住固体，缓慢放入水中，读出总体积V₂",
-                    "计算固体体积V固=V₂-V₁",
-                    "测量液体质量：测量烧杯质量m₂，烧杯+液体质量m₃",
-                    "计算液体质量m液=m₃-m₂，体积V液=V液",
-                    "计算密度ρ=m/V"
-                ],
-                formulas: ["ρ=m/V"],
-                notes: "使用排水法测量不规则固体体积，测量液体时要注意减小误差"
-            },
-            
-            // 初中物理探究类实验 (12个)
-            {
-                id: 10,
-                name: "探究水在沸腾前后温度变化的特点",
-                grade: "初中",
-                type: "探究类",
-                subject: "热学",
-                purpose: "探究水沸腾过程中温度变化规律",
-                equipment: ["酒精灯", "铁架台", "石棉网", "烧杯", "温度计", "水", "秒表"],
-                steps: [
-                    "组装实验装置，调整高度",
-                    "在烧杯中加入适量水，插入温度计",
-                    "用酒精灯加热，每隔1分钟记录一次温度",
-                    "观察水的沸腾现象，继续加热记录温度",
-                    "绘制温度-时间图像，分析规律"
-                ],
-                formulas: [],
-                notes: "沸腾时温度保持不变，继续吸热，气泡上升过程的变化"
-            },
-            {
-                id: 11,
-                name: "探究滑动摩擦力大小与哪些因素有关",
-                grade: "初中",
-                type: "探究类",
-                subject: "力学",
-                purpose: "探究滑动摩擦力大小与压力大小和接触面粗糙程度的关系",
-                equipment: ["弹簧测力计", "木块", "砝码", "不同粗糙程度的表面"],
-                steps: [
-                    "控制接触面粗糙程度不变，改变压力大小，测量摩擦力",
-                    "控制压力大小不变，改变接触面粗糙程度，测量摩擦力",
-                    "分析数据，得出结论"
-                ],
-                formulas: ["f = μN"],
-                notes: "运用控制变量法，匀速拉动木块使拉力等于摩擦力"
-            },
-            {
-                id: 12,
-                name: "探究液体压强与哪些因素有关",
-                grade: "初中",
-                type: "探究类",
-                subject: "力学",
-                purpose: "探究液体内部压强与深度和液体密度的关系",
-                equipment: ["压强计", "烧杯", "水", "盐水", "刻度尺"],
-                steps: [
-                    "控制液体密度不变，改变探头在液体中的深度，观察U形管液面高度差",
-                    "控制深度不变，使用不同密度的液体，观察液面高度差",
-                    "分析数据，得出液体压强规律"
-                ],
-                formulas: ["p = ρgh"],
-                notes: "深度是指液体表面到某点的距离，密度越大压强越大"
-            },
-            {
-                id: 13,
-                name: "探究浮力大小与哪些因素有关",
-                grade: "初中",
-                type: "探究类",
-                subject: "力学",
-                purpose: "探究浮力大小与液体密度和排开液体体积的关系",
-                equipment: ["弹簧测力计", "圆柱体", "烧杯", "水", "盐水", "细线"],
-                steps: [
-                    "用弹簧测力计测量圆柱体重力G",
-                    "将圆柱体浸入水中不同深度，记录示数F",
-                    "将圆柱体浸入不同密度的液体中，记录示数F",
-                    "计算浮力F浮=G-F，分析规律"
-                ],
-                formulas: ["F浮 = G-F", "F浮 = ρ液gV排"],
-                notes: "浮力大小与深度无关，只与排开液体的体积和液体密度有关"
-            },
-            {
-                id: 14,
-                name: "探究杠杆的平衡条件",
-                grade: "初中",
-                type: "探究类",
-                subject: "力学",
-                purpose: "探究杠杆平衡时动力、阻力与力臂的关系",
-                equipment: ["杠杆", "支架", "钩码", "刻度尺"],
-                steps: [
-                    "调节杠杆两端的平衡螺母，使杠杆在水平位置平衡",
-                    "在杠杆两侧挂钩码，使其重新平衡",
-                    "测量动力臂L₁和阻力臂L₂",
-                    "记录动力F₁和阻力F₂",
-                    "改变钩码数量和位置，重复实验",
-                    "分析数据得出F₁L₁=F₂L₂"
-                ],
-                formulas: ["F₁L₁ = F₂L₂"],
-                notes: "实验前调节杠杆水平是为了便于测量力臂，运用控制变量法"
-            },
-            {
-                id: 15,
-                name: "探究光的反射定律",
-                grade: "初中",
-                type: "探究类",
-                subject: "光学",
-                purpose: "探究光的反射现象中反射角与入射角的关系",
-                equipment: ["激光笔", "平面镜", "纸板", "量角器"],
-                steps: [
-                    "将纸板垂直放置在平面镜上",
-                    "用激光笔照射平面镜，观察反射光线",
-                    "用量角器测量入射角和反射角",
-                    "改变入射角，重复实验",
-                    "分析数据得出反射定律"
-                ],
-                formulas: ["∠i = ∠r"],
-                notes: "入射光线、反射光线和法线在同一平面内，反射角等于入射角"
-            },
-            {
-                id: 16,
-                name: "探究平面镜成像的特点",
-                grade: "初中",
-                type: "探究类",
-                subject: "光学",
-                purpose: "探究平面镜成像的性质、大小、位置特点",
-                equipment: ["平面镜", "透明玻璃板", "蜡烛", "刻度尺", "白纸"],
-                steps: [
-                    "在水平桌面上铺白纸，竖立玻璃板",
-                    "点燃蜡烛A放在玻璃板前方",
-                    "在玻璃板后方移动未点燃的蜡烛B，直到与A的像重合",
-                    "记录A、B的位置，测量像距和物距",
-                    "比较像与物的大小关系",
-                    "分析平面镜成像特点"
-                ],
-                formulas: ["物距 = 像距", "像与物大小相等"],
-                notes: "用玻璃板代替平面镜便于确定像的位置，虚像无法用光屏承接"
-            },
-            {
-                id: 17,
-                name: "探究凸透镜成像的规律",
-                grade: "初中",
-                type: "探究类",
-                subject: "光学",
-                purpose: "探究凸透镜成像的性质与物距的关系",
-                equipment: ["凸透镜", "蜡烛", "光屏", "光具座"],
-                steps: [
-                    "调整蜡烛、凸透镜、光屏高度，使中心在同一高度",
-                    "固定凸透镜焦距f",
-                    "改变物距u，寻找清晰像的位置",
-                    "记录物距u、像距v、像的性质",
-                    "分析成像规律"
-                ],
-                formulas: ["1/f = 1/u + 1/v"],
-                notes: "物距小于焦距时成虚像，不能在光屏上呈现"
-            },
-            {
-                id: 18,
-                name: "探究电流与电压、电阻的关系",
-                grade: "初中",
-                type: "探究类",
-                subject: "电学",
-                purpose: "探究电流与电压、电阻的关系，验证欧姆定律",
-                equipment: ["电源", "开关", "定值电阻", "滑动变阻器", "电压表", "电流表", "导线"],
-                steps: [
-                    "研究电流与电压关系：保持电阻不变，改变电压，记录电流",
-                    "研究电流与电阻关系：保持电压不变，更换电阻，记录电流",
-                    "分析数据，验证I=U/R"
-                ],
-                formulas: ["I = U/R"],
-                notes: "控制变量法：研究两个量关系时，保持第三个量不变"
-            },
-            {
-                id: 19,
-                name: "探究通电螺线管外部磁场的方向",
-                grade: "初中",
-                type: "探究类",
-                subject: "电学",
-                purpose: "探究通电螺线管外部磁场的方向",
-                equipment: ["螺线管", "电源", "开关", "导线", "小磁针"],
-                steps: [
-                    "将小磁针放置在螺线管周围不同位置",
-                    "接通电源，观察小磁针偏转情况",
-                    "改变电流方向，再次观察小磁针偏转",
-                    "总结通电螺线管磁场方向的规律",
-                    "应用安培定则判断磁场方向"
-                ],
-                formulas: ["安培定则"],
-                notes: "右手握住螺线管，四指指向电流方向，大拇指指向N极"
-            },
-            {
-                id: 20,
-                name: "探究导体在磁场中运动时产生感应电流的条件",
-                grade: "初中",
-                type: "探究类",
-                subject: "电学",
-                purpose: "探究电磁感应现象产生的条件",
-                equipment: ["导体棒", "蹄形磁铁", "灵敏电流表", "导线"],
-                steps: [
-                    "将导体棒接入电路，形成闭合回路",
-                    "让导体棒静止在磁场中，观察电流表",
-                    "让导体棒平行于磁场方向运动，观察电流表",
-                    "让导体棒垂直于磁场方向运动，观察电流表",
-                    "改变磁场方向或运动方向，观察电流表变化",
-                    "总结电磁感应条件"
-                ],
-                formulas: ["法拉第电磁感应定律"],
-                notes: "闭合电路的一部分导体在磁场中做切割磁感线运动时产生感应电流"
-            },
-            {
-                id: 21,
-                name: "探究串联电路和并联电路中电流、电压的特点",
-                grade: "初中",
-                type: "探究类",
-                subject: "电学",
-                purpose: "探究串并联电路中电流和电压的规律",
-                equipment: ["电源", "开关", "小灯泡", "电流表", "电压表", "导线"],
-                steps: [
-                    "连接串联电路，测量各处电流和各元件电压",
-                    "记录数据，分析串联电路电流、电压特点",
-                    "连接并联电路，测量干路和支路电流、各支路电压",
-                    "记录数据，分析并联电路电流、电压特点",
-                    "总结串并联电路规律"
-                ],
-                formulas: ["串联: I=I₁=I₂, U=U₁+U₂", "并联: I=I₁+I₂, U=U₁=U₂"],
-                notes: "串联电路电流处处相等，电压分配与电阻成正比；并联电路电压相等，电流分配与电阻成反比"
-            },
-            
-            // 高中物理必修部分实验 (12个)
-            {
-                id: 22,
-                name: "测量做直线运动物体的瞬时速度",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "利用打点计时器测量物体的瞬时速度",
-                equipment: ["打点计时器", "纸带", "重锤", "铁架台", "刻度尺", "学生电源"],
-                steps: [
-                    "安装打点计时器，固定纸带，连接重锤",
-                    "接通电源，释放重锤，打出纸带",
-                    "选取合适点迹，测量相邻点间距离",
-                    "利用平均速度代替瞬时速度的方法计算",
-                    "分析运动规律"
-                ],
-                formulas: ["v = Δx/Δt"],
-                notes: "选取点迹清晰的区域，注意时间间隔的计算"
-            },
-            {
-                id: 23,
-                name: "探究弹簧弹力与形变量的关系",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "探究弹簧弹力与形变量的关系，验证胡克定律",
-                equipment: ["弹簧", "支架", "钩码", "刻度尺"],
-                steps: [
-                    "测量弹簧原长L₀",
-                    "挂上钩码，测量弹簧长度L",
-                    "计算形变量x=L-L₀",
-                    "改变钩码数量，记录多组数据",
-                    "绘制F-x图像，分析规律"
-                ],
-                formulas: ["F = kx"],
-                notes: "在弹性限度内，弹簧弹力与形变量成正比"
-            },
-            {
-                id: 24,
-                name: "探究两个互成角度的力的合成规律",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "探究力的合成规律，验证平行四边形定则",
-                equipment: ["橡皮条", "细绳套", "弹簧测力计", "三角板", "图钉", "白纸"],
-                steps: [
-                    "固定橡皮条一端，用两个弹簧测力计拉另一端至O点",
-                    "记录两个力的大小和方向",
-                    "用一个弹簧测力计拉至O点，记录合力",
-                    "按比例作出力的图示",
-                    "验证平行四边形定则"
-                ],
-                formulas: ["平行四边形定则"],
-                notes: "实验中要保证两次拉伸效果相同，即橡皮条结点到达同一位置"
-            },
-            {
-                id: 25,
-                name: "探究加速度与物体受力、物体质量的关系",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "探究加速度与力、质量的关系，验证牛顿第二定律",
-                equipment: ["打点计时器", "纸带", "小车", "砝码", "细线", "滑轮", "天平"],
-                steps: [
-                    "控制质量不变，改变拉力，测量加速度",
-                    "控制拉力不变，改变小车质量，测量加速度",
-                    "分析a-F和a-1/m图像",
-                    "验证F=ma"
-                ],
-                formulas: ["F = ma"],
-                notes: "运用控制变量法，平衡摩擦力使mg=M总a"
-            },
-            {
-                id: 26,
-                name: "验证机械能守恒定律",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "验证在只有重力做功的情况下，物体的机械能守恒",
-                equipment: ["打点计时器", "纸带", "重锤", "铁架台", "刻度尺", "学生电源"],
-                steps: [
-                    "安装打点计时器，固定纸带，连接重锤",
-                    "接通电源，释放重锤，打出纸带",
-                    "选取合适点迹，测量高度和速度",
-                    "计算各点的重力势能和动能",
-                    "验证Eₚ+Eₖ=常数"
-                ],
-                formulas: ["E = Eₖ+Eₚ", "Eₖ = ½mv²", "Eₚ = mgh"],
-                notes: "注意选择合适的计时起点，减小空气阻力影响"
-            },
-            {
-                id: 27,
-                name: "探究平抛运动的特点",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "探究平抛运动的轨迹和规律",
-                equipment: ["平抛实验器", "白纸", "复写纸", "小球", "铅垂线"],
-                steps: [
-                    "安装平抛实验器，调整水平",
-                    "释放小球，记录落点",
-                    "改变释放高度，记录多组数据",
-                    "描绘平抛运动轨迹",
-                    "分析水平匀速、竖直自由落体"
-                ],
-                formulas: ["x = v₀t", "y = ½gt²", "轨迹方程: y = gx²/(2v₀²)"],
-                notes: "平抛运动水平方向匀速，竖直方向自由落体"
-            },
-            {
-                id: 28,
-                name: "探究向心力大小与半径、角速度、质量的关系",
-                grade: "高中",
-                type: "必修部分",
-                subject: "力学",
-                purpose: "探究向心力与半径、角速度、质量的关系",
-                equipment: ["向心力演示器", "砝码", "刻度尺"],
-                steps: [
-                    "控制质量和角速度不变，改变半径，测量向心力",
-                    "控制半径和质量不变，改变角速度，测量向心力",
-                    "控制半径和角速度不变，改变质量，测量向心力",
-                    "分析数据，验证F=mrω²"
-                ],
-                formulas: ["F = mv²/r = mrω² = m(2πf)²r"],
-                notes: "运用控制变量法研究三个物理量的关系"
-            },
-            {
-                id: 29,
-                name: "观察电容器的充、放电现象",
-                grade: "高中",
-                type: "必修部分",
-                subject: "电学",
-                purpose: "观察电容器充放电过程中的电流变化",
-                equipment: ["电容器", "电阻", "电源", "开关", "电流表", "导线"],
-                steps: [
-                    "连接充电电路，观察电流表变化",
-                    "连接放电电路，观察电流表变化",
-                    "改变电阻，观察充放电快慢",
-                    "分析充放电规律"
-                ],
-                formulas: ["Q = CU", "τ = RC"],
-                notes: "充放电过程中电流逐渐减小至零，电阻影响充放电快慢"
-            },
-            {
-                id: 30,
-                name: "长度的测量及其测量工具的选用",
-                grade: "高中",
-                type: "必修部分",
-                subject: "基本测量",
-                purpose: "掌握不同长度测量工具的使用方法",
-                equipment: ["刻度尺", "游标卡尺", "螺旋测微器", "待测物体"],
-                steps: [
-                    "认识各种测量工具的构造和分度值",
-                    "用刻度尺测量较长长度",
-                    "用游标卡尺测量中等长度",
-                    "用螺旋测微器测量微小长度",
-                    "比较不同工具的精度"
-                ],
-                formulas: ["游标卡尺读数 = 主尺读数 + 游标读数", "螺旋测微器读数 = 固定刻度 + 可动刻度"],
-                notes: "游标卡尺无需估读，螺旋测微器需估读到0.001mm"
-            },
-            {
-                id: 31,
-                name: "测量金属丝的电阻率",
-                grade: "高中",
-                type: "必修部分",
-                subject: "电学",
-                purpose: "测定金属丝的电阻率",
-                equipment: ["螺旋测微器", "毫米刻度尺", "电流表", "电压表", "滑动变阻器", "待测金属丝"],
-                steps: [
-                    "用螺旋测微器测量金属丝直径d",
-                    "用刻度尺测量金属丝长度L",
-                    "按电路图连接电路",
-                    "测量不同电压下的电流值",
-                    "计算电阻R=U/I",
-                    "利用ρ=RS/L计算电阻率"
-                ],
-                formulas: ["R = ρL/S", "S = π(d/2)²"],
-                notes: "螺旋测微器读数需估读到0.001mm，注意电路连接方式"
-            },
-            {
-                id: 32,
-                name: "用多用电表测量电学中的物理量",
-                grade: "高中",
-                type: "必修部分",
-                subject: "电学",
-                purpose: "学习使用多用电表测量电压、电流、电阻",
-                equipment: ["多用电表", "电源", "电阻", "导线"],
-                steps: [
-                    "机械调零",
-                    "选择合适的量程",
-                    "测量直流电压、交流电压",
-                    "测量直流电流、交流电流",
-                    "测量电阻",
-                    "注意安全使用"
-                ],
-                formulas: [],
-                notes: "测量前要选择合适的量程，测电阻前要欧姆调零，不能带电测电阻"
-            },
-            {
-                id: 33,
-                name: "测量电源的电动势和内阻",
-                grade: "高中",
-                type: "必修部分",
-                subject: "电学",
-                purpose: "测量电源的电动势和内阻",
-                equipment: ["电源", "电流表", "电压表", "滑动变阻器", "开关", "导线"],
-                steps: [
-                    "连接电路",
-                    "改变滑动变阻器阻值，记录多组U、I数据",
-                    "绘制U-I图像",
-                    "由图像求得电动势E和内阻r"
-                ],
-                formulas: ["E = U + Ir", "E = IR + Ir"],
-                notes: "利用U-I图像的截距和斜率求解，注意图像法处理数据"
-            },
-            
-            // 高中物理选择性必修部分实验 (9个)
-            {
-                id: 34,
-                name: "验证动量守恒定律",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "力学",
-                purpose: "验证碰撞过程中系统的总动量守恒",
-                equipment: ["气垫导轨", "光电门", "滑块", "挡光片", "天平"],
-                steps: [
-                    "调节气垫导轨水平",
-                    "测量两滑块质量m₁、m₂",
-                    "安装光电门，测量挡光片宽度",
-                    "进行弹性碰撞实验，记录碰撞前后速度",
-                    "计算碰撞前后总动量，验证p₁+p₂=p₁'+p₂'"
-                ],
-                formulas: ["p = mv", "p₁+p₂=p₁'+p₂'"],
-                notes: "气垫导轨减小摩擦，提高实验精度"
-            },
-            {
-                id: 35,
-                name: "用单摆测量重力加速度的大小",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "力学",
-                purpose: "用单摆测定当地的重力加速度",
-                equipment: ["摆球", "细线", "铁架台", "秒表", "刻度尺"],
-                steps: [
-                    "制作单摆，测量摆长L",
-                    "测量单摆周期T，测量多次全振动的时间",
-                    "改变摆长，重复测量",
-                    "利用T=2π√(L/g)计算g值"
-                ],
-                formulas: ["T = 2π√(L/g)", "g = 4π²L/T²"],
-                notes: "摆角小于5°，摆长为摆线长+摆球半径，测量多个周期的时间"
-            },
-            {
-                id: 36,
-                name: "测量玻璃的折射率",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "光学",
-                purpose: "测定玻璃的折射率",
-                equipment: ["玻璃砖", "白纸", "图钉", "大头针", "三角板", "量角器"],
-                steps: [
-                    "在白纸上画出玻璃砖边界",
-                    "插上两根大头针确定入射光线",
-                    "透过玻璃砖观察，插上另外两根大头针确定出射光线",
-                    "用量角器测量入射角和折射角",
-                    "利用n=sin i/sin r计算折射率"
-                ],
-                formulas: ["n = sin i/sin r"],
-                notes: "大头针要垂直插在纸上，入射角不宜过小或过大"
-            },
-            {
-                id: 37,
-                name: "用双缝干涉实验测量光的波长",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "光学",
-                purpose: "利用双缝干涉现象测量光的波长",
-                equipment: ["双缝干涉仪", "单色光源", "遮光筒", "滤光片"],
-                steps: [
-                    "安装双缝干涉仪，调节光源",
-                    "观察干涉条纹",
-                    "测量相邻亮条纹间距Δx",
-                    "测量双缝到屏的距离l",
-                    "已知双缝间距d，利用λ=dΔx/l计算波长"
-                ],
-                formulas: ["λ = dΔx/l"],
-                notes: "实验环境需较暗，确保条纹清晰可见"
-            },
-            {
-                id: 38,
-                name: "探究影响感应电流方向的因素",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "电学",
-                purpose: "探究楞次定律，理解感应电流方向的规律",
-                equipment: ["线圈", "条形磁铁", "灵敏电流表", "导线"],
-                steps: [
-                    "将磁铁N极插入线圈，观察电流表偏转方向",
-                    "将磁铁N极拔出线圈，观察电流表偏转方向",
-                    "改变磁铁S极插入和拔出，观察电流表偏转",
-                    "分析感应电流方向与磁通量变化的关系"
-                ],
-                formulas: ["楞次定律"],
-                notes: "感应电流的磁场总是阻碍引起感应电流的磁通量变化"
-            },
-            {
-                id: 39,
-                name: "探究变压器原、副线圈电压与匝数的关系",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "电学",
-                purpose: "探究变压器电压与匝数的关系",
-                equipment: ["变压器", "交流电源", "电压表", "导线"],
-                steps: [
-                    "连接变压器电路",
-                    "测量原线圈电压U₁和副线圈电压U₂",
-                    "改变原副线圈匝数比，重复测量",
-                    "分析U₁/U₂=n₁/n₂的关系"
-                ],
-                formulas: ["U₁/U₂ = n₁/n₂"],
-                notes: "变压器只能改变交流电压，不能改变直流电压"
-            },
-            {
-                id: 40,
-                name: "利用传感器制作简单的自动控制装置",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "现代技术",
-                purpose: "了解传感器的应用，制作简单自动控制装置",
-                equipment: ["光敏传感器", "声音传感器", "温度传感器", "LED灯", "继电器", "电路板"],
-                steps: [
-                    "选择合适的传感器",
-                    "设计控制电路",
-                    "连接传感器和执行器",
-                    "测试自动控制功能",
-                    "优化控制参数"
-                ],
-                formulas: [],
-                notes: "传感器将非电量转换为电信号，实现自动控制"
-            },
-            {
-                id: 41,
-                name: "用油膜法估测油酸分子的大小",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "分子物理",
-                purpose: "用油膜法估测分子的大小",
-                equipment: ["油酸", "酒精", "痱子粉", "浅盘", "量筒", "注射器"],
-                steps: [
-                    "配制油酸酒精溶液",
-                    "在浅盘中撒上痱子粉",
-                    "滴入一滴油酸酒精溶液",
-                    "测量油膜面积",
-                    "利用V=Sd计算分子直径"
-                ],
-                formulas: ["d = V/S"],
-                notes: "假设油膜为单分子层，油酸浓度要适当稀释"
-            },
-            {
-                id: 42,
-                name: "探究等温情况下一定质量气体压强与体积的关系",
-                grade: "高中",
-                type: "选择性必修部分",
-                subject: "热学",
-                purpose: "验证玻意耳定律",
-                equipment: ["注射器", "压强传感器", "计算机", "温度计"],
-                steps: [
-                    "连接注射器和压强传感器",
-                    "保持温度不变",
-                    "改变气体体积，记录压强值",
-                    "绘制p-V图像和p-1/V图像",
-                    "验证pV=常数"
-                ],
-                formulas: ["pV = 常数 (等温过程)"],
-                notes: "等温条件下，压强与体积成反比"
-            }
-        ];
-
-        // 统计数据
-        let stats = {
-            total: 0,
-            junior: 0,
-            senior: 0,
-            measuring: 0,
-            exploring: 0,
-            required: 0,
-            elective: 0
-        };
-
-        // 初始化应用
-        function initApp() {
-            calculateStats();
-            displayStats();
-            displayExperiments(experiments);
-        }
-
-        // 计算统计数据
-        function calculateStats() {
-            stats.total = experiments.length;
-            stats.junior = experiments.filter(exp => exp.grade === '初中').length;
-            stats.senior = experiments.filter(exp => exp.grade === '高中').length;
-            stats.measuring = experiments.filter(exp => exp.type === '测量类').length;
-            stats.exploring = experiments.filter(exp => exp.type === '探究类').length;
-            stats.required = experiments.filter(exp => exp.type === '必修部分').length;
-            stats.elective = experiments.filter(exp => exp.type === '选择性必修部分').length;
-        }
-
-        // 显示统计数据
-        function displayStats() {
-            document.getElementById('total-count').textContent = stats.total;
-            document.getElementById('junior-count').textContent = stats.junior;
-            document.getElementById('senior-count').textContent = stats.senior;
-            document.getElementById('measuring-count').textContent = stats.measuring;
-            document.getElementById('exploring-count').textContent = stats.exploring;
-        }
-
-        // 显示实验列表
-        function displayExperiments(experiments) {
-            const container = document.getElementById('experiments-container');
-            
-            if (experiments.length === 0) {
-                container.innerHTML = `
-                    <div class="no-results">
-                        <i class="fas fa-search"></i>
-                        <h3>未找到相关实验</h3>
-                        <p>请尝试调整筛选条件或搜索关键词</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = experiments.map(exp => `
-                <div class="experiment-card" onclick="showExperimentDetail(${exp.id})">
-                    <div class="card-header">
-                        <div class="card-title">${exp.name}</div>
-                        <div class="type-badge">${exp.type}</div>
-                    </div>
-                    <div class="grade-badge">${exp.grade}</div>
-                    
-                    <div class="card-body">
-                        <div class="card-section">
-                            <div class="card-section-title">实验科目</div>
-                            <div class="card-section-content">${exp.subject}</div>
-                        </div>
-                        
-                        <div class="card-section">
-                            <div class="card-section-title">实验目的</div>
-                            <div class="card-section-content">${exp.purpose}</div>
-                        </div>
-                        
-                        <div class="card-section">
-                            <div class="card-section-title">所需器材</div>
-                            <div class="equipment-list">
-                                ${exp.equipment.slice(0, 5).map(item => `<span class="equipment-item">${item}</span>`).join('')}
-                                ${exp.equipment.length > 5 ? `<span class="equipment-item">+${exp.equipment.length - 5}</span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 搜索实验
-        function searchExperiments() {
-            const grade = document.getElementById('grade-filter').value;
-            const type = document.getElementById('type-filter').value;
-            const keyword = document.getElementById('keyword-search').value.toLowerCase();
-            
-            let filteredExperiments = experiments.filter(exp => {
-                const matchesGrade = !grade || exp.grade === grade;
-                const matchesType = !type || exp.type === type;
-                const matchesKeyword = !keyword || 
-                    exp.name.toLowerCase().includes(keyword) || 
-                    exp.purpose.toLowerCase().includes(keyword) ||
-                    exp.subject.toLowerCase().includes(keyword) ||
-                    exp.equipment.some(item => item.toLowerCase().includes(keyword));
-                
-                return matchesGrade && matchesType && matchesKeyword;
+        document.querySelectorAll("[data-page]").forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                renderPage(link.dataset.page);
             });
-            
-            displayExperiments(filteredExperiments);
-        }
-
-        // 重置筛选条件
-        function resetFilters() {
-            document.getElementById('grade-filter').value = '';
-            document.getElementById('type-filter').value = '';
-            document.getElementById('keyword-search').value = '';
-            displayExperiments(experiments);
-        }
-
-        // 显示实验详情
-        function showExperimentDetail(id) {
-            const experiment = experiments.find(exp => exp.id === id);
-            if (!experiment) {
-                alert('实验不存在');
-                return;
-            }
-
-            const modalBody = document.getElementById('modal-body');
-            modalBody.innerHTML = `
-                <div class="modal-header">
-                    <h2 class="modal-title">${experiment.name}</h2>
-                    <div style="display: flex; gap: 15px; margin-top: 10px;">
-                        <span class="grade-badge">${experiment.grade}</span>
-                        <span class="type-badge">${experiment.type}</span>
-                        <span style="background: #e8f5e8; color: #2e7d32; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem;">
-                            ${experiment.subject}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="modal-info">
-                    <div>
-                        <div class="card-section-title">实验目的</div>
-                        <div class="card-section-content">${experiment.purpose}</div>
-                    </div>
-                    
-                    <div>
-                        <div class="card-section-title">所需器材</div>
-                        <div class="equipment-list">
-                            ${experiment.equipment.map(item => `<span class="equipment-item">${item}</span>`).join('')}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-steps">
-                    <div class="card-section-title">实验步骤</div>
-                    <ol>
-                        ${experiment.steps.map(step => `<li>${step}</li>`).join('')}
-                    </ol>
-                </div>
-                
-                ${experiment.formulas.length > 0 ? `
-                <div>
-                    <div class="card-section-title">相关公式</div>
-                    ${experiment.formulas.map(formula => `<div class="modal-equation">${formula}</div>`).join('')}
-                </div>
-                ` : ''}
-                
-                <div>
-                    <div class="card-section-title">注意事项</div>
-                    <div class="card-section-content">${experiment.notes}</div>
-                </div>
-            `;
-            
-            document.getElementById('experiment-modal').style.display = 'block';
-        }
-
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('experiment-modal').style.display = 'none';
-        }
-
-        // 导出数据
-        function exportData() {
-            const dataStr = JSON.stringify(experiments, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = 'physics_experiments.json';
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-
-        // 切换标签页
-        function switchTab(tabName) {
-            // 更新标签状态
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // 过滤显示的实验
-            let filteredExperiments;
-            if (tabName === 'all') {
-                filteredExperiments = experiments;
-            } else if (tabName === 'junior') {
-                filteredExperiments = experiments.filter(exp => exp.grade === '初中');
-            } else if (tabName === 'senior') {
-                filteredExperiments = experiments.filter(exp => exp.grade === '高中');
-            }
-            
-            displayExperiments(filteredExperiments);
-        }
-
-        // 点击模态框外部关闭
-        window.onclick = function(event) {
-            const modal = document.getElementById('experiment-modal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
-
-        // 回车键搜索
-        document.getElementById('keyword-search').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchExperiments();
-            }
         });
-
-        // 监听筛选条件变化
-        document.getElementById('grade-filter').addEventListener('change', searchExperiments);
-        document.getElementById('type-filter').addEventListener('change', searchExperiments);
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            initApp();
+        
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) logoutBtn.onclick = logout;
+        
+        document.getElementById("hamburgerBtn").onclick = () => document.getElementById("mobileMenu").classList.toggle("open");
+        document.addEventListener("click", (e) => {
+            const menu = document.getElementById("mobileMenu");
+            const btn = document.getElementById("hamburgerBtn");
+            if (menu.classList.contains("open") && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) menu.classList.remove("open");
         });
-    </script>
+        
+        const userArea = document.getElementById("userArea");
+        if (userArea) {
+            userArea.addEventListener("click", (e) => {
+                if (e.target.closest('.logout-btn')) return;
+                if (currentUser) {
+                    renderPage("profile");
+                } else {
+                    document.getElementById("authModal").style.display = "flex";
+                }
+            });
+        }
+        
+        bindEmailValidation();
+        renderPage("home");
+    }
+    init();
+</script>
 </body>
 </html>
