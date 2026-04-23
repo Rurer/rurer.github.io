@@ -10,7 +10,48 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
+
+	/* 开关按钮样式 */
+	.switch {
+  	  position: relative;
+    	display: inline-block;
+    	width: 50px;
+   	 height: 26px;
+	}
+	.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+	}
+	.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 34px;
+	}
+	.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+	}
+	input:checked + .slider {
+   	 background-color: var(--primary);
+	}
+	input:checked + .slider:before {
+    transform: translateX(24px);
+	}
+    	    }
 
         :root {
             --primary: #e6a157;
@@ -191,7 +232,7 @@
         /* 轮播图 */
         .carousel-container {
             position: relative;
-            border-radius: 28px;
+            border-radius: 32px;
             overflow: hidden;
             margin-bottom: 2rem;
             box-shadow: var(--shadow);
@@ -5241,17 +5282,124 @@ function startFrictionInvestigationAnimation() {
         document.getElementById("changePwdBtn").onclick = () => { const old = document.getElementById("oldPwd").value; const newp = document.getElementById("newPwd").value; const confirm = document.getElementById("confirmPwd").value; if(!old || !newp){ alert("请填写完整"); return; } if(newp !== confirm){ alert("新密码不一致"); return; } if(newp.length<6){ alert("密码至少6位"); return; } if(btoa(old) !== currentUser.password){ alert("当前密码错误"); return; } currentUser.password = btoa(newp); saveCurrentUser(currentUser); const users = getUsers(); const idx = users.findIndex(u=>u.email===currentUser.email); if(idx!==-1){ users[idx].password = btoa(newp); saveUsers(users); } alert("密码修改成功，请重新登录"); logout(); };
     }
 
-    function renderSettings(container) {
-        const isDark = document.body.classList.contains("dark");
-        container.innerHTML = `<div class="card"><h2 class="section-title"><i class="fas fa-cog"></i> 系统设置</h2><div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;"><span>深色主题</span><label><input type="checkbox" id="themeToggle" ${isDark ? "checked" : ""}> 开启</label></div><div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;"><span>字体大小</span><select id="fontSizeSelect"><option value="small">小</option><option value="medium" selected>中</option><option value="large">大</option></select></div><div style="margin-top:1.5rem; display:flex; gap:1rem;"><button class="btn" id="backupBtn">备份数据</button><button class="btn" id="restoreBtn">恢复数据</button></div></div>`;
-        document.getElementById("themeToggle").onchange = (e) => { if(e.target.checked) document.body.classList.add("dark"); else document.body.classList.remove("dark"); localStorage.setItem("theme", e.target.checked ? "dark" : "light"); };
-        const fontSizeSelect = document.getElementById("fontSizeSelect");
-        const savedFont = localStorage.getItem("fontSize") || "medium";
-        fontSizeSelect.value = savedFont;
-        fontSizeSelect.onchange = (e) => { const size = e.target.value; document.documentElement.style.fontSize = size === "small" ? "14px" : size === "large" ? "18px" : "16px"; localStorage.setItem("fontSize", size); };
-        document.getElementById("backupBtn").onclick = () => { const data = { users: getUsers(), currentUser, theme: localStorage.getItem("theme"), fontSize: localStorage.getItem("fontSize") }; const blob = new Blob([JSON.stringify(data)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "physics_backup.json"; a.click(); URL.revokeObjectURL(url); };
-        document.getElementById("restoreBtn").onclick = () => { const input = document.createElement("input"); input.type = "file"; input.accept = "application/json"; input.onchange = (e) => { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = (ev) => { try { const data = JSON.parse(ev.target.result); if(data.users) localStorage.setItem("physics_users", JSON.stringify(data.users)); if(data.currentUser) localStorage.setItem("physics_currentUser", JSON.stringify(data.currentUser)); if(data.theme) localStorage.setItem("theme", data.theme); if(data.fontSize) localStorage.setItem("fontSize", data.fontSize); alert("恢复成功，页面将刷新"); location.reload(); } catch(e){ alert("恢复失败"); } }; reader.readAsText(file); }; input.click(); };
-    }
+function renderSettings(container) {
+    const isDark = document.body.classList.contains("dark");
+    container.innerHTML = `
+        <div class="card">
+            <h2 class="section-title"><i class="fas fa-cog"></i> 系统设置</h2>
+            <p style="color:var(--text-light); margin-bottom:1.5rem;">控制界面主题、字体大小以及数据管理。</p>
+            
+            <!-- 外观设置 -->
+            <div style="background:var(--bg-light); border-radius:20px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;">
+                <h3 style="font-size:1.2rem; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-paint-brush"></i> 外观
+                </h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.8rem 0; border-bottom:1px solid var(--border);">
+                    <div>
+                        <strong>深色主题</strong>
+                        <p style="font-size:0.85rem; color:var(--text-light); margin:0;">切换深色/浅色界面风格</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" ${isDark ? "checked" : ""}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.8rem 0;">
+                    <div>
+                        <strong>字体大小</strong>
+                        <p style="font-size:0.85rem; color:var(--text-light); margin:0;">调整全局文字大小</p>
+                    </div>
+                    <select id="fontSizeSelect" style="padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:var(--card-bg); color:var(--text-dark);">
+                        <option value="small" ${localStorage.getItem("fontSize") === "small" ? "selected" : ""}>小</option>
+                        <option value="medium" ${localStorage.getItem("fontSize") !== "small" && localStorage.getItem("fontSize") !== "large" ? "selected" : ""}>中 (默认)</option>
+                        <option value="large" ${localStorage.getItem("fontSize") === "large" ? "selected" : ""}>大</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 数据管理 -->
+            <div style="background:var(--bg-light); border-radius:20px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;">
+                <h3 style="font-size:1.2rem; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-database"></i> 数据管理
+                </h3>
+                <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                    <button class="btn" id="backupBtn" style="flex:1; min-width:120px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-download"></i> 备份数据
+                    </button>
+                    <button class="btn" id="restoreBtn" style="flex:1; min-width:120px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-upload"></i> 恢复数据
+                    </button>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.8rem;">备份数据将保存您的用户信息、设置和实验记录；恢复数据将覆盖当前所有数据。</p>
+            </div>
+
+            <!-- 关于 -->
+            <div style="text-align:center; color:var(--text-light); font-size:0.85rem; margin-top:1rem;">
+                <i class="fas fa-flask"></i> 中学物理实验系统 v1.0 · 格物致知
+            </div>
+        </div>
+    `;
+
+    // 深色主题开关事件
+    document.getElementById("themeToggle").onchange = (e) => {
+        document.body.classList.toggle("dark", e.target.checked);
+        localStorage.setItem("theme", e.target.checked ? "dark" : "light");
+    };
+
+    // 字体大小选择
+    const fontSizeSelect = document.getElementById("fontSizeSelect");
+    fontSizeSelect.onchange = (e) => {
+        const size = e.target.value;
+        document.documentElement.style.fontSize =
+            size === "small" ? "14px" : size === "large" ? "18px" : "16px";
+        localStorage.setItem("fontSize", size);
+        // 更新当前选中项（可选）
+        fontSizeSelect.value = size;
+    };
+
+    // 备份数据
+    document.getElementById("backupBtn").onclick = () => {
+        const data = {
+            users: getUsers(),
+            currentUser,
+            theme: localStorage.getItem("theme"),
+            fontSize: localStorage.getItem("fontSize")
+        };
+        const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "physics_backup.json";
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // 恢复数据
+    document.getElementById("restoreBtn").onclick = () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json";
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.users) localStorage.setItem("physics_users", JSON.stringify(data.users));
+                    if (data.currentUser) localStorage.setItem("physics_currentUser", JSON.stringify(data.currentUser));
+                    if (data.theme) localStorage.setItem("theme", data.theme);
+                    if (data.fontSize) localStorage.setItem("fontSize", data.fontSize);
+                    alert("恢复成功，页面将刷新");
+                    location.reload();
+                } catch (ex) {
+                    alert("恢复失败：文件格式错误");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    };
+}
 
     function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
     function login() { const email = document.getElementById("loginEmail").value.trim(); const pwd = document.getElementById("loginPassword").value; if (!isValidEmail(email)) { document.getElementById("authError").innerText = "请输入有效的邮箱地址"; document.getElementById("authError").style.display = "block"; return; } const users = getUsers(); const user = users.find(u => u.email === email && u.password === btoa(pwd)); if (user) { saveCurrentUser(user); closeAuthModal(); updateUILoginState(); renderPage(currentPage, currentExpId); } else { document.getElementById("authError").innerText = "邮箱或密码错误"; document.getElementById("authError").style.display = "block"; } }
