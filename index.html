@@ -5753,6 +5753,7 @@ function startSensorAnimation() {
     let threshold = 0.5;
     let sensorValue = 0.6;
     
+    // 绘图函数
     function draw() {
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
@@ -5808,22 +5809,32 @@ function startSensorAnimation() {
         ctx.fillText(isOn ? "LED 点亮" : "LED 熄灭", 20, 100);
     }
     
-    // 添加控制面板
-    let ctrlDiv = canvas.parentNode.querySelector(".sensor-ctrl");
-    if (!ctrlDiv) {
-        ctrlDiv = document.createElement("div");
-        ctrlDiv.className = "sensor-ctrl";
-        ctrlDiv.innerHTML = `
-            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px;">
-                <button id="sensorLightBtn" class="btn" style="padding:4px 12px;">光控</button>
-                <button id="sensorTempBtn" class="btn" style="padding:4px 12px;">温控</button>
-                <div>输入值: <input type="range" id="sensorValueSlider" min="0" max="1" step="0.01" value="0.6"> <span id="sensorValueVal">0.60</span></div>
-                <div>阈值: <input type="range" id="sensorThreshSlider" min="0" max="1" step="0.01" value="0.5"> <span id="sensorThreshVal">0.50</span></div>
-            </div>
-        `;
-        canvas.parentNode.appendChild(ctrlDiv);
-    }
+    // 强力清除所有可能残留的控制面板（包括不同类名、不同容器的）
+    const parent = canvas.parentNode;
+    // 移除所有类包含 'sensor-ctrl', 'control-panel', 'sensor-panel' 的元素
+    parent.querySelectorAll('.sensor-ctrl, .sensor-panel, .control-panel, .thermo-control, .induction-params').forEach(el => el.remove());
+    // 额外移除 id 以 'sensor' 开头的外部 div（防止漏网）
+    const allDivs = parent.querySelectorAll('div');
+    allDivs.forEach(div => {
+        if (div.id && div.id.startsWith('sensor')) div.remove();
+        if (div.className && (div.className.includes('ctrl') || div.className.includes('panel'))) div.remove();
+    });
     
+    // 创建新的控制面板
+    const ctrlDiv = document.createElement("div");
+    ctrlDiv.className = "sensor-ctrl";
+    ctrlDiv.style.cssText = "margin-top:10px;";
+    ctrlDiv.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+            <button id="sensorLightBtn" class="btn" style="padding:4px 12px;">光控</button>
+            <button id="sensorTempBtn" class="btn" style="padding:4px 12px;">温控</button>
+            <div>输入值: <input type="range" id="sensorValueSlider" min="0" max="1" step="0.01" value="0.6"> <span id="sensorValueVal">0.60</span></div>
+            <div>阈值: <input type="range" id="sensorThreshSlider" min="0" max="1" step="0.01" value="0.5"> <span id="sensorThreshVal">0.50</span></div>
+        </div>
+    `;
+    parent.appendChild(ctrlDiv);
+    
+    // 绑定事件（使用 onclick 避免重复监听）
     const lightBtn = document.getElementById("sensorLightBtn");
     const tempBtn = document.getElementById("sensorTempBtn");
     const valSlider = document.getElementById("sensorValueSlider");
@@ -5831,17 +5842,16 @@ function startSensorAnimation() {
     const valSpan = document.getElementById("sensorValueVal");
     const threshSpan = document.getElementById("sensorThreshVal");
     
-    if (lightBtn && !lightBtn.hasListener) {
-        lightBtn.onclick = () => { mode = "light"; draw(); };
-        tempBtn.onclick = () => { mode = "temperature"; draw(); };
-        valSlider.addEventListener("input", (e) => { sensorValue = parseFloat(e.target.value); valSpan.innerText = sensorValue.toFixed(2); draw(); });
-        threshSlider.addEventListener("input", (e) => { threshold = parseFloat(e.target.value); threshSpan.innerText = threshold.toFixed(2); draw(); });
-        lightBtn.hasListener = true;
-    }
+    lightBtn.onclick = () => { mode = "light"; draw(); };
+    tempBtn.onclick = () => { mode = "temperature"; draw(); };
+    valSlider.oninput = (e) => { sensorValue = parseFloat(e.target.value); valSpan.innerText = sensorValue.toFixed(2); draw(); };
+    threshSlider.oninput = (e) => { threshold = parseFloat(e.target.value); threshSpan.innerText = threshold.toFixed(2); draw(); };
     
+    // 窗口大小变化时重绘
     window.addEventListener("resize", () => draw());
     draw();
 }
+
 
 	// 探究滑动摩擦力影响因素动画 41
 function startFrictionInvestigationAnimation() {
