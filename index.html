@@ -649,7 +649,7 @@
         .store-img {
             flex: 1;
             min-height: 280px;
-            background-image: url('https://picsum.photos/id/260/800/600');
+            background-image: url('https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=800&h=600&fit=crop');
             background-size: cover;
             background-position: center;
         }
@@ -1118,12 +1118,29 @@
     let carouselInterval;
     let boilingTimer = null;
     let chargeTimer = null;
-    const carouselSlides = [
-        { title: "力学世界", desc: "探索牛顿定律与运动规律，从基础测量到动量守恒", img: "https://picsum.photos/id/163/1200/600" },
-        { title: "热学奥秘", desc: "温度与热传递，分子动理论与气体定律", img: "https://picsum.photos/id/29/1200/600" },
-        { title: "光学奇境", desc: "光的反射折射，干涉衍射，探索成像规律", img: "https://picsum.photos/id/1/1200/600" },
-        { title: "电学磁场", desc: "电路分析，电磁感应，传感器应用", img: "https://picsum.photos/id/4/1200/600" }
-    ];
+
+const carouselSlides = [
+    {
+        title: "力学世界",
+        desc: "探索牛顿定律与运动规律，从基础测量到动量守恒",
+        img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=600&fit=crop"  // 山
+    },
+    {
+        title: "热学奥秘",
+        desc: "温度与热传递，分子动理论与气体定律",
+        img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=600&fit=crop"  // 木（森林）
+    },
+    {
+        title: "光学奇境",
+        desc: "光的反射折射，干涉衍射，探索成像规律",
+        img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=600&fit=crop"  // 海
+    },
+    {
+        title: "电学磁场",
+        desc: "电路分析，电磁感应，传感器应用",
+        img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=600&fit=crop"  // 鸟
+    }
+];
 
     // 邮箱格式验证函数
     function isValidEmail(email) { const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return re.test(email); }
@@ -1218,7 +1235,33 @@
             </div>
             <section class="slogan-section"><div><blockquote><p>“实验是检验真理的唯一标准。每一次测量，都是与宇宙的一次对话。”</p><footer>— 物理实验室 · 实验精神</footer></blockquote><p>※ 格物致知，动手求真</p></div></section>
             <section class="store-section"><div class="store-flex"><div class="store-img"></div><div class="store-info"><h2>🔬 动手实验工坊 · 限时开放</h2><p>亲手操作单摆、凸透镜成像、静电起电机等经典实验装置。专业导师指导，带你从现象理解物理定律。</p><a href="#" class="btn-outline" id="gotoExperimentsBtn">前往实验中心 →</a></div></div></section>
-            <section class="products-section"><h2>🧪 实验套件 · 科学探索包</h2><div class="products-grid"><div class="product-card"><img src="https://picsum.photos/id/20/400/400" alt="单摆"><h3>单摆周期实验</h3><p>研究摆长与周期关系</p></div><div class="product-card"><img src="https://picsum.photos/id/29/400/400" alt="热传导"><h3>热传导对比仪</h3><p>金属棒蜡块熔化实验</p></div><div class="product-card"><img src="https://picsum.photos/id/1/400/400" alt="光学"><h3>几何光学实验箱</h3><p>观察折射与聚焦</p></div><div class="product-card"><img src="https://picsum.photos/id/4/400/400" alt="电磁"><h3>法拉第电磁感应</h3><p>磁铁抽插线圈点亮LED</p></div></div></section>
+
+           <section class="products-section">
+    <h2>🧪 实验套件 · 科学探索包</h2>
+    <div class="products-grid">
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=400&h=400&fit=crop" alt="春">
+            <h3>力学探秘</h3>
+            <p>万物复苏，探索运动规律</p>
+        </div>
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=400&fit=crop" alt="夏">
+            <h3>热学奇观</h3>
+            <p>烈日炎炎，感受能量传递</p>
+        </div>
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=400&h=400&fit=crop" alt="秋">
+            <h3> 光学映像</h3>
+            <p>秋高气爽，捕捉光影变幻</p>
+        </div>
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=400&fit=crop" alt="冬">
+            <h3> 电磁世界</h3>
+            <p>银装素裹，探索电磁奥秘</p>
+        </div>
+    </div>
+</section>
+
         `;
         initCarousel();
         document.getElementById("gotoExperimentsBtn").addEventListener("click", (e) => { e.preventDefault(); renderPage("experiments"); });
