@@ -1469,7 +1469,6 @@ const carouselSlides = [
     };
 
     // 弹簧测力计动画 1
-	// 弹簧测力计动画（支持响应式）
 function startSpringForceAnimation() {
     const canvas = document.getElementById("springForceCanvas");
     if (!canvas) return;
@@ -1572,15 +1571,15 @@ function startSpringForceAnimation() {
         ctx.fillText(`${(forceValue/9.8*1000).toFixed(0)}g`, canvasWidth*0.47, springBottomY+16);
         
         // 数据面板
-        ctx.fillStyle = "#2c2418";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText(`拉力: ${forceValue.toFixed(1)} N`, canvasWidth*0.15, canvasHeight*0.2);
-        ctx.fillText(`伸长量: ${(forceValue/k).toFixed(2)} cm`, canvasWidth*0.15, canvasHeight*0.3);
-        ctx.fillText(`劲度系数 k: ${k} N/cm`, canvasWidth*0.15, canvasHeight*0.4);
-        if (forceValue > maxForce) {
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillText("⚠️ 超过量程！", canvasWidth*0.15, canvasHeight*0.5);
-        }
+ctx.fillStyle = "#2c2418";
+ctx.font = "bold 14px Arial";
+ctx.fillText(`拉力: ${forceValue.toFixed(1)} N`, 20, 40);                // 左上角第一行
+ctx.fillText(`伸长量: ${(forceValue/k).toFixed(2)} cm`, 20, 70);         // 第二行
+ctx.fillText(`劲度系数 k: ${k} N/cm`, 20, 100);                         // 第三行
+if (forceValue > maxForce) {
+    ctx.fillStyle = "#e74c3c";
+    ctx.fillText(" 超过量程！", 20, 130);
+}
     }
     
     // 绑定滑块事件（避免重复绑定）
@@ -1608,8 +1607,8 @@ function startBalanceAnimation() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     
-    let objectMass = 50;
-    let rightMass = 0;
+    let objectMass = 50;   // 物体质量（左侧）
+    let rightMass = 0;     // 砝码质量（右侧）
     
     function draw() {
         const canvasWidth = canvas.clientWidth;
@@ -1622,15 +1621,19 @@ function startBalanceAnimation() {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
+        // 底座
         ctx.fillStyle = "#8B5A2B";
         ctx.fillRect(canvasWidth*0.3, canvasHeight*0.8, canvasWidth*0.4, canvasHeight*0.05);
         ctx.fillRect(canvasWidth*0.48, canvasHeight*0.7, canvasWidth*0.04, canvasHeight*0.1);
         
+        // 倾斜角度：右侧重时（rightMass > objectMass），右侧应下沉，即右侧y坐标增大
         let angle = (rightMass - objectMass) * 0.005;
         let pivotX = canvasWidth*0.5, pivotY = canvasHeight*0.7;
-        let leftPanX = pivotX - canvasWidth*0.2, leftPanY = pivotY + Math.sin(angle)*40;
-        let rightPanX = pivotX + canvasWidth*0.2, rightPanY = pivotY - Math.sin(angle)*40;
+        // 修正：右侧重时rightPanY增加（向下），左侧leftPanY减少（向上）
+        let leftPanX = pivotX - canvasWidth*0.2, leftPanY = pivotY - Math.sin(angle)*40;
+        let rightPanX = pivotX + canvasWidth*0.2, rightPanY = pivotY + Math.sin(angle)*40;
         
+        // 画出三角形的杠杆臂
         ctx.beginPath();
         ctx.moveTo(pivotX, pivotY);
         ctx.lineTo(leftPanX, leftPanY);
@@ -1638,6 +1641,7 @@ function startBalanceAnimation() {
         ctx.fillStyle = "#B87333";
         ctx.fill();
         
+        // 左盘（物体），绿色
         ctx.fillStyle = "#D2B48C";
         ctx.fillRect(leftPanX-25, leftPanY-10, 50, 10);
         ctx.fillRect(rightPanX-25, rightPanY-10, 50, 10);
@@ -1648,11 +1652,13 @@ function startBalanceAnimation() {
         ctx.font = "12px Arial";
         ctx.fillText(`${objectMass}g`, leftPanX-10, leftPanY-28);
         
+        // 右盘（砝码），金色
         ctx.fillStyle = "#FFD700";
         ctx.fillRect(rightPanX-15, rightPanY-25, 30, 15);
         ctx.fillStyle = "#000";
         ctx.fillText(`${rightMass}g`, rightPanX-10, rightPanY-28);
         
+        // 指针
         ctx.beginPath();
         ctx.moveTo(pivotX, pivotY);
         ctx.lineTo(pivotX + 10*Math.sin(angle), pivotY + 20*Math.cos(angle));
@@ -1660,6 +1666,7 @@ function startBalanceAnimation() {
         ctx.lineWidth = 2;
         ctx.stroke();
         
+        // 状态文字
         ctx.fillStyle = "#2c2418";
         ctx.font = "bold 14px Arial";
         let diff = rightMass - objectMass;
@@ -1668,25 +1675,29 @@ function startBalanceAnimation() {
         else ctx.fillText("左边重", canvasWidth*0.45, canvasHeight*0.9);
     }
     
-    // 绑定按钮（避免重复绑定）
+    // 绑定按钮（确保 addMass 控制 objectMass，addWeight 控制 rightMass）
     const addMassBtn = document.getElementById("addMass");
     const subMassBtn = document.getElementById("subMass");
     const addWeightBtn = document.getElementById("addWeight");
     const subWeightBtn = document.getElementById("subWeight");
     
     if (addMassBtn && !addMassBtn.hasListener) {
+        // 物体质量控制
         addMassBtn.onclick = () => { objectMass += 5; if(objectMass>200) objectMass=200; draw(); };
         subMassBtn.onclick = () => { objectMass -= 5; if(objectMass<0) objectMass=0; draw(); };
+        // 砝码质量控制
         addWeightBtn.onclick = () => { rightMass += 5; if(rightMass>200) rightMass=200; draw(); };
         subWeightBtn.onclick = () => { rightMass -= 5; if(rightMass<0) rightMass=0; draw(); };
+        
         addMassBtn.hasListener = true;
     }
     
+    // 窗口大小变化时重绘
     window.addEventListener("resize", () => draw());
     draw();
 }
 
-    // 速度测量动画（平均速度） 3
+    // 速度测量动画（平均速度）3
 function startSpeedAnimation() {
     const canvas = document.getElementById("speedCanvas");
     if (!canvas) return;
