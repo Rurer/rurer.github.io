@@ -1277,7 +1277,7 @@ const carouselSlides = [
         img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=600&fit=crop"  // 海
     },
     {
-        title: "电学磁场",
+        title: "电场磁场",
         desc: "电路分析，电磁感应，传感器应用",
         img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=600&fit=crop"  // 鸟
     }
@@ -2606,101 +2606,87 @@ function startForceSynthesisAnimation() {
     window.__forceSynthesisCleanup = () => { if (animFrame) cancelAnimationFrame(animFrame); };
 }
 
-    // 牛顿第二定律动画（加速度与力、质量的关系） 12
+    // 牛顿第二定律动画（加速度与力、质量的关系）动画 12
 function startAccelerationAnimation() {
     const canvas = document.getElementById("accelerationCanvas");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     
-    let force = 5.0;   // N
-    let mass = 2.0;    // kg
-    let carX = 50;     // 小车位置
-    let velocity = 0;
+    let force = 5.0, mass = 2.0;
+    let carX = 50, velocity = 0;
     let lastTimestamp = 0;
     let animFrame = null;
-    let trackLength = 0;
     
-    function getAcceleration() {
-        return force / mass;   // m/s²
+    function getAcceleration() { return force / mass; }
+    
+    // 尝试获取或创建控制面板
+    let ctrlPanel = canvas.parentNode.querySelector(".accel-ctrl");
+    if (!ctrlPanel) {
+        ctrlPanel = document.createElement("div");
+        ctrlPanel.className = "accel-ctrl";
+        ctrlPanel.innerHTML = `<button id="resetAccelBtn" class="btn" style="margin-top:8px;">↩ 重置小车</button>`;
+        canvas.parentNode.appendChild(ctrlPanel);
     }
+    document.getElementById("resetAccelBtn").onclick = () => { carX = 50; velocity = 0; };
     
     function draw() {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        canvas.width = width;
-        canvas.height = height;
-        trackLength = width - 150;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        canvas.width = w;
+        canvas.height = h;
+        const trackLength = w - 150;
         
-        ctx.clearRect(0, 0, width, height);
+        ctx.clearRect(0, 0, w, h);
         const bgColor = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
         ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, 0, w, h);
         
-        // 轨道
         ctx.fillStyle = "#C0A080";
-        ctx.fillRect(50, height - 80, trackLength, 20);
+        ctx.fillRect(50, h-80, trackLength, 20);
         
-        // 小车
         ctx.fillStyle = "#E63946";
-        ctx.fillRect(carX, height - 100, 60, 30);
+        ctx.fillRect(carX, h-100, 60, 30);
         ctx.fillStyle = "#fff";
         ctx.font = "bold 12px Arial";
-        ctx.fillText("小车", carX + 15, height - 80);
+        ctx.fillText("小车", carX+15, h-80);
         
-        // 拉力箭头
         const arrowLen = force * 12;
         ctx.beginPath();
-        ctx.moveTo(carX + 60, height - 85);
-        ctx.lineTo(carX + 60 + arrowLen, height - 85);
+        ctx.moveTo(carX+60, h-85);
+        ctx.lineTo(carX+60+arrowLen, h-85);
         ctx.strokeStyle = "#e74c3c";
         ctx.lineWidth = 3;
         ctx.stroke();
-        ctx.fillStyle = "#e74c3c";
-        ctx.fillText(`F = ${force.toFixed(1)} N`, carX + 60 + arrowLen - 30, height - 95);
         
-        // 加速度仪表盘
         const a = getAcceleration();
-        const maxA = 15;
-        const angleRad = -Math.PI/2 + (a / maxA) * Math.PI;
-        const centerX = width - 80;
-        const centerY = height - 60;
-        const radius = 45;
-        
+        const centerX = w - 80, centerY = h - 60, radius = 45;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2*Math.PI);
         ctx.strokeStyle = "#aaa";
         ctx.lineWidth = 2;
         ctx.stroke();
-        
+        const angle = -Math.PI/2 + Math.min(a/15, 1) * Math.PI;
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
-        ctx.lineTo(centerX + Math.cos(angleRad) * 35, centerY + Math.sin(angleRad) * 35);
+        ctx.lineTo(centerX + Math.cos(angle)*35, centerY + Math.sin(angle)*35);
         ctx.strokeStyle = "#e63946";
         ctx.lineWidth = 3;
         ctx.stroke();
-        
         ctx.fillStyle = "#2c2418";
         ctx.font = "bold 14px Arial";
-        ctx.fillText(`${a.toFixed(2)} m/s²`, centerX - 25, centerY + 25);
+        ctx.fillText(`${a.toFixed(2)} m/s²`, centerX-25, centerY+25);
         
-        // 数据面板
-        ctx.fillStyle = "#2c2418";
-        ctx.font = "bold 16px Arial";
-        ctx.fillText(`力 F = ${force.toFixed(1)} N`, 50, 60);
-        ctx.fillText(`质量 m = ${mass.toFixed(1)} kg`, 50, 100);
-        ctx.fillStyle = "#e63946";
-        ctx.fillText(`加速度 a = ${a.toFixed(2)} m/s²`, 50, 140);
-        ctx.fillStyle = "#2c2418";
-        ctx.fillText(`当前速度 v = ${velocity.toFixed(2)} m/s`, 50, 180);
+        ctx.font = "bold 15px Arial";
+        ctx.fillText(`力 F = ${force.toFixed(1)} N， 质量 m = ${mass.toFixed(1)} kg`, 50, 60);
+        ctx.fillText(`加速度 a = ${a.toFixed(2)} m/s²， 速度 v = ${velocity.toFixed(2)} m/s`, 50, 90);
     }
     
     function updatePosition(deltaTime) {
         const a = getAcceleration();
         velocity += a * deltaTime;
         carX += velocity * deltaTime * 30;
-        
-        const width = canvas.clientWidth;
-        const trackLen = width - 150;
+        const w = canvas.clientWidth;
+        const trackLen = w - 150;
         if (carX > 50 + trackLen - 60) {
             carX = 50 + trackLen - 60;
             velocity = 0;
@@ -2713,9 +2699,7 @@ function startAccelerationAnimation() {
     function animate(timestamp) {
         if (!lastTimestamp) lastTimestamp = timestamp;
         const deltaTime = Math.min((timestamp - lastTimestamp) / 1000, 0.1);
-        if (deltaTime > 0) {
-            updatePosition(deltaTime);
-        }
+        if (deltaTime > 0) updatePosition(deltaTime);
         draw();
         lastTimestamp = timestamp;
         animFrame = requestAnimationFrame(animate);
@@ -2725,25 +2709,18 @@ function startAccelerationAnimation() {
     const massSlider = document.getElementById("massSlider");
     const forceVal = document.getElementById("forceVal");
     const massVal = document.getElementById("massVal");
-    
     if (forceSlider && !forceSlider.hasListener) {
-        forceSlider.addEventListener("input", (e) => {
-            force = parseFloat(e.target.value);
-            forceVal.innerText = force.toFixed(1);
-        });
-        massSlider.addEventListener("input", (e) => {
-            mass = parseFloat(e.target.value);
-            massVal.innerText = mass.toFixed(1);
-        });
+        forceSlider.addEventListener("input", (e) => { force = parseFloat(e.target.value); forceVal.innerText = force.toFixed(1); });
+        massSlider.addEventListener("input", (e) => { mass = parseFloat(e.target.value); massVal.innerText = mass.toFixed(1); });
         forceSlider.hasListener = true;
     }
     
     window.addEventListener("resize", () => draw());
-    
     if (animFrame) cancelAnimationFrame(animFrame);
     animFrame = requestAnimationFrame(animate);
     window.__accelerationCleanup = () => { if (animFrame) cancelAnimationFrame(animFrame); };
 }
+
 
     // 机械能守恒动画（自由落体/斜面） 13
 function startEnergyConservationAnimation() {
@@ -3348,149 +3325,232 @@ function startMomentumConservationAnimation() {
     const canvas = document.getElementById("momentumCanvas");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    
-    let mass1 = 1.0;      // kg
-    let mass2 = 1.0;      // kg
-    let velocity1 = 2.0;   // m/s
-    let velocity2 = 0.0;   // m/s
-    let position1 = 100;   // px
-    let position2 = 300;   // px
+
+    let mass1 = 1.0, mass2 = 1.0;
+    let velocity1 = 2.0, velocity2 = -2.0;
+    let position1 = 80, position2 = 300;      // 像素位置，动态初始化
     let collisionOccurred = false;
-    
-    function getInitialMomentum() {
-        return mass1 * velocity1 + mass2 * velocity2;
+    let initialTotalP = 0;
+
+    const speedScale = 1.2;                  // 像素/(帧·m/s)
+    const blockWidth = 40;                   // 滑块宽度
+
+    let animFrame = null;
+
+    // 弹性碰撞后速度计算
+    function computeCollisionVelocities() {
+        const v1 = ((mass1 - mass2) * velocity1 + 2 * mass2 * velocity2) / (mass1 + mass2);
+        const v2 = ((mass2 - mass1) * velocity2 + 2 * mass1 * velocity1) / (mass1 + mass2);
+        return [v1, v2];
     }
-    
-    function getFinalVelocity1() {
-        return ((mass1 - mass2) * velocity1 + 2 * mass2 * velocity2) / (mass1 + mass2);
-    }
-    
-    function getFinalVelocity2() {
-        return ((mass2 - mass1) * velocity2 + 2 * mass1 * velocity1) / (mass1 + mass2);
-    }
-    
-    function resetSimulation() {
+
+    // 智能安排左右位置，保证初始不重叠且必然碰撞
+    function arrangePositions() {
         const w = canvas.clientWidth;
-        position1 = 100;
-        position2 = w - 100;  // 动态调整右侧初始位置
-        collisionOccurred = false;
+        const leftLimit = 80;
+        const rightLimit = w - 80 - blockWidth;  // 滑块不会被切掉的右边界
+
+        const v1dir = Math.sign(velocity1);
+        const v2dir = Math.sign(velocity2);
+
+        // 都静止：随便放，不碰撞，但不会重叠
+        if (v1dir === 0 && v2dir === 0) {
+            position1 = leftLimit;
+            position2 = leftLimit + blockWidth + 20;  // 隔开20px
+            return;
+        }
+
+        // 一个静止：让运动滑块朝向静止滑块的方向
+        if (v1dir === 0) {
+            if (v2dir > 0) {
+                position1 = leftLimit;
+                position2 = leftLimit + blockWidth + 30;
+            } else {
+                position1 = rightLimit;
+                position2 = leftLimit;
+            }
+            return;
+        }
+        if (v2dir === 0) {
+            if (v1dir > 0) {
+                position1 = leftLimit;
+                position2 = leftLimit + blockWidth + 30;
+            } else {
+                position1 = rightLimit;
+                position2 = leftLimit;
+            }
+            return;
+        }
+
+        // 两者都运动
+        if (v1dir === v2dir) {
+            // 同向：将速度大的放在后面（左边）
+            if (velocity1 >= velocity2) {
+                position1 = leftLimit;
+                position2 = leftLimit + blockWidth + 30;
+            } else {
+                position1 = rightLimit;
+                position2 = leftLimit;
+            }
+        } else {
+            // 异向：向右的放左边，向左的放右边，保证相碰
+            if (velocity1 > 0) {
+                position1 = leftLimit;
+                position2 = rightLimit;
+            } else {
+                position1 = rightLimit;
+                position2 = leftLimit;
+            }
+        }
     }
-    
+
+    // 重置模拟
+    function resetSimulation() {
+        const m1Slider = document.getElementById("momentumM1Slider");
+        const m2Slider = document.getElementById("momentumM2Slider");
+        const v1Slider = document.getElementById("momentumV1Slider");
+        const v2Slider = document.getElementById("momentumV2Slider");
+
+        mass1 = m1Slider ? parseFloat(m1Slider.value) : 1.0;
+        mass2 = m2Slider ? parseFloat(m2Slider.value) : 1.0;
+        velocity1 = v1Slider ? parseFloat(v1Slider.value) : 2.0;
+        velocity2 = v2Slider ? parseFloat(v2Slider.value) : -2.0;
+
+        collisionOccurred = false;
+        initialTotalP = mass1 * velocity1 + mass2 * velocity2;
+        arrangePositions();
+    }
+
+    // 绘制函数
     function draw() {
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
         canvas.width = w;
         canvas.height = h;
-        
-        ctx.clearRect(0, 0, w, h);
+
         const bgColor = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
+        ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, w, h);
-        
+
         // 轨道
         ctx.fillStyle = "#C0A080";
-        ctx.fillRect(50, h / 2, w - 100, 20);
-        
-        // 更新位置（非碰撞时）
-        if (!collisionOccurred) {
-            position1 += velocity1 * 2;
-            position2 += velocity2 * 2;
-            
-            if (position1 + 40 >= position2) {
-                collisionOccurred = true;
-                const newV1 = getFinalVelocity1();
-                const newV2 = getFinalVelocity2();
-                velocity1 = newV1;
-                velocity2 = newV2;
+        ctx.fillRect(50, h / 2 - 10, w - 100, 20);
+
+        // ---------- 运动更新与防重叠处理 ----------
+        const nextPos1 = position1 + velocity1 * speedScale;
+        const nextPos2 = position2 + velocity2 * speedScale;
+
+        // 碰撞检测条件：下一帧两者矩形重叠或顺序颠倒
+        const willOverlap = (position1 < position2 && nextPos1 + blockWidth > nextPos2) ||
+                            (position2 < position1 && nextPos2 + blockWidth > nextPos1);
+
+        if (!collisionOccurred && willOverlap) {
+            // 发生碰撞
+            collisionOccurred = true;
+            const [newV1, newV2] = computeCollisionVelocities();
+            velocity1 = newV1;
+            velocity2 = newV2;
+
+            // 精确放置到刚好接触的位置
+            if (position1 < position2) {
+                position1 = position2 - blockWidth;
+            } else {
+                position2 = position1 - blockWidth;
             }
         } else {
-            position1 += velocity1 * 2;
-            position2 += velocity2 * 2;
+            // 正常移动
+            position1 = nextPos1;
+            position2 = nextPos2;
         }
-        
-        // 边界限制（防止滑出视口）
-        if (position1 < 50) position1 = 50;
-        if (position2 > w - 90) position2 = w - 90;
-        
-        // 滑块1
+
+        // 边界限制，防止完全移出视野
+        const minX = 50;
+        const maxX = w - 50 - blockWidth;
+        if (position1 < minX) position1 = minX;
+        if (position1 > maxX) position1 = maxX;
+        if (position2 < minX) position2 = minX;
+        if (position2 > maxX) position2 = maxX;
+
+        // 额外安全措施：如果某种原因仍然重叠，强制分离
+        if (Math.abs(position1 - position2) < blockWidth) {
+            if (position1 < position2) {
+                position1 = position2 - blockWidth;
+            } else {
+                position2 = position1 - blockWidth;
+            }
+        }
+
+        // 绘制滑块1（红色）
         ctx.fillStyle = "#e74c3c";
-        ctx.fillRect(position1, h / 2 - 30, 40, 60);
+        ctx.fillRect(position1, h / 2 - 30, blockWidth, 60);
         ctx.fillStyle = "#fff";
         ctx.font = "bold 12px Arial";
         ctx.fillText(`m1=${mass1.toFixed(1)}kg`, position1 + 5, h / 2 - 10);
         ctx.fillText(`v1=${velocity1.toFixed(1)}m/s`, position1 + 5, h / 2 + 10);
-        
-        // 滑块2
+
+        // 绘制滑块2（蓝色）
         ctx.fillStyle = "#3498db";
-        ctx.fillRect(position2, h / 2 - 30, 40, 60);
+        ctx.fillRect(position2, h / 2 - 30, blockWidth, 60);
         ctx.fillStyle = "#fff";
         ctx.fillText(`m2=${mass2.toFixed(1)}kg`, position2 + 5, h / 2 - 10);
         ctx.fillText(`v2=${velocity2.toFixed(1)}m/s`, position2 + 5, h / 2 + 10);
-        
-        // 动量数据
-        const initialP = getInitialMomentum();
-        const finalP = mass1 * velocity1 + mass2 * velocity2;
+
+        // 数据展示
+        const currentP = mass1 * velocity1 + mass2 * velocity2;
         ctx.fillStyle = "#2c2418";
         ctx.font = "bold 14px Arial";
-        ctx.fillText(`碰撞前总动量: ${initialP.toFixed(2)} kg·m/s`, 20, 40);
-        ctx.fillText(`碰撞后总动量: ${finalP.toFixed(2)} kg·m/s`, 20, 80);
+        ctx.fillText(`碰撞前总动量: ${initialTotalP.toFixed(2)} kg·m/s`, 20, 40);
+        ctx.fillText(`当前总动量: ${currentP.toFixed(2)} kg·m/s`, 20, 70);
+
         if (collisionOccurred) {
             ctx.fillStyle = "#27ae60";
-            ctx.fillText("✓ 动量守恒验证", 20, 120);
+            ctx.fillText("✓ 动量守恒验证通过", 20, 105);
         } else {
             ctx.fillStyle = "#e67e22";
-            ctx.fillText("碰撞前", 20, 120);
+            ctx.fillText("运动中，等待碰撞...", 20, 105);
         }
+
+        // 底部提示
+        ctx.fillStyle = "#aaa";
+        ctx.font = "12px Arial";
+        ctx.fillText("调节滑块（或点击重置）自动排列位置，保证碰撞发生且不重叠", 20, h - 20);
     }
-    
-    // 滑块事件
-    const m1Slider = document.getElementById("momentumM1Slider");
-    const m2Slider = document.getElementById("momentumM2Slider");
-    const v1Slider = document.getElementById("momentumV1Slider");
-    const v2Slider = document.getElementById("momentumV2Slider");
-    const m1Val = document.getElementById("momentumM1Value");
-    const m2Val = document.getElementById("momentumM2Value");
-    const v1Val = document.getElementById("momentumV1Value");
-    const v2Val = document.getElementById("momentumV2Value");
-    
-    if (m1Slider && !m1Slider.hasListener) {
-        m1Slider.addEventListener("input", (e) => {
-            mass1 = parseFloat(e.target.value);
-            m1Val.innerText = mass1.toFixed(1);
-            resetSimulation();
-            draw();
-        });
-        m2Slider.addEventListener("input", (e) => {
-            mass2 = parseFloat(e.target.value);
-            m2Val.innerText = mass2.toFixed(1);
-            resetSimulation();
-            draw();
-        });
-        v1Slider.addEventListener("input", (e) => {
-            velocity1 = parseFloat(e.target.value);
-            v1Val.innerText = velocity1.toFixed(1);
-            resetSimulation();
-            draw();
-        });
-        v2Slider.addEventListener("input", (e) => {
-            velocity2 = parseFloat(e.target.value);
-            v2Val.innerText = velocity2.toFixed(1);
-            resetSimulation();
-            draw();
-        });
-        m1Slider.hasListener = true;
-    }
-    
-    window.addEventListener("resize", () => {
-        resetSimulation();
+
+    // 动画循环
+    function animationLoop() {
         draw();
-    });
-    
+        animFrame = requestAnimationFrame(animationLoop);
+    }
+
+    // 绑定UI
+    function bindControls() {
+        const m1Slider = document.getElementById("momentumM1Slider");
+        const m2Slider = document.getElementById("momentumM2Slider");
+        const v1Slider = document.getElementById("momentumV1Slider");
+        const v2Slider = document.getElementById("momentumV2Slider");
+        const resetBtn = document.getElementById("momentumResetBtn");
+
+        const m1Val = document.getElementById("momentumM1Value");
+        const m2Val = document.getElementById("momentumM2Value");
+        const v1Val = document.getElementById("momentumV1Value");
+        const v2Val = document.getElementById("momentumV2Value");
+
+        m1Slider.oninput = () => { mass1 = parseFloat(m1Slider.value); m1Val.innerText = mass1.toFixed(1); resetSimulation(); };
+        m2Slider.oninput = () => { mass2 = parseFloat(m2Slider.value); m2Val.innerText = mass2.toFixed(1); resetSimulation(); };
+        v1Slider.oninput = () => { velocity1 = parseFloat(v1Slider.value); v1Val.innerText = velocity1.toFixed(1); resetSimulation(); };
+        v2Slider.oninput = () => { velocity2 = parseFloat(v2Slider.value); v2Val.innerText = velocity2.toFixed(1); resetSimulation(); };
+
+        if (resetBtn) resetBtn.onclick = () => resetSimulation();
+    }
+
+    // 清理旧动画
+    if (window._momentumAnimFrame) cancelAnimationFrame(window._momentumAnimFrame);
+
+    bindControls();
     resetSimulation();
-    draw();
-    // 使用 setInterval 持续更新位置（原代码使用 setInterval，此处保留）
-    if (window.__momentumInterval) clearInterval(window.__momentumInterval);
-    window.__momentumInterval = setInterval(() => draw(), 50);
+    animFrame = requestAnimationFrame(animationLoop);
+    window._momentumAnimFrame = animFrame;
 }
 
     // 单摆动画 18
@@ -4786,94 +4846,190 @@ function startCircuitAnimation() {
     const canvas = document.getElementById("circuitCanvas");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    
-    let mode = "series";   // "series" 或 "parallel"
-    let voltage = 9.0;     // V
-    let r1 = 10.0, r2 = 20.0;   // Ω
-    
-    function getCurrents() {
+
+    let mode = "series";          // "series" 或 "parallel"
+    const voltage = 9.0;          // 固定电源电压
+    let r1 = 10, r2 = 20;         // 电阻值
+
+    // 读数状态变量
+    let readingTaken = false;
+    let displayI = 0, displayI1 = 0, displayI2 = 0;
+    let displayU1 = 0, displayU2 = 0;
+
+    // 根据当前模式计算电流、电压
+    function calc() {
         if (mode === "series") {
             const R = r1 + r2;
             const I = voltage / R;
-            return { I1: I, I2: I, U1: I * r1, U2: I * r2, U: voltage };
+            return {
+                I: I, I1: I, I2: I,
+                U1: I * r1, U2: I * r2, U: voltage
+            };
         } else {
             const I1 = voltage / r1;
             const I2 = voltage / r2;
-            const I = I1 + I2;
-            return { I1, I2, I, U1: voltage, U2: voltage, U: voltage };
+            return {
+                I: I1 + I2, I1: I1, I2: I2,
+                U1: voltage, U2: voltage, U: voltage
+            };
         }
     }
-    
+
     function draw() {
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
-        canvas.width = w;
-        canvas.height = h;
-        
+        canvas.width = w; canvas.height = h;
+
+        const bg = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
         ctx.clearRect(0, 0, w, h);
-        const bgColor = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
-        ctx.fillStyle = bgColor;
+        ctx.fillStyle = bg;
         ctx.fillRect(0, 0, w, h);
-        
-        // 简单电路图
-        ctx.fillStyle = "#333";
+
+        const circuitY = h * 0.42;
+        const left = w * 0.2, right = w * 0.8;
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 3;
+
+        // 主回路
+        ctx.beginPath();
+        ctx.moveTo(left, circuitY);
+        ctx.lineTo(right, circuitY);
+        ctx.stroke();
+
         if (mode === "series") {
-            ctx.fillRect(w/2 - 120, h/2 - 20, 240, 10);
-            ctx.fillRect(w/2 - 10, h/2 - 40, 20, 60);
-            ctx.fillRect(w/2 - 50, h/2 - 40, 20, 60);
-            ctx.fillStyle = "#888";
-            ctx.fillRect(w/2 - 60, h/2 - 35, 40, 15);
-            ctx.fillRect(w/2, h/2 - 35, 40, 15);
+            // 串联：两个电阻放在主线上
+            const r1x = w * 0.38, r2x = w * 0.62;
+            drawResistor(ctx, r1x, circuitY, "#888");
+            drawResistor(ctx, r2x, circuitY, "#888");
             ctx.fillStyle = "#000";
             ctx.font = "12px Arial";
-            ctx.fillText("R1", w/2 - 50, h/2 - 25);
-            ctx.fillText("R2", w/2 + 10, h/2 - 25);
+            ctx.fillText("R1", r1x - 20, circuitY - 18);
+            ctx.fillText("R2", r2x - 20, circuitY - 18);
         } else {
-            ctx.fillRect(w/2 - 120, h/2 - 20, 240, 10);
-            ctx.fillRect(w/2 - 60, h/2 - 40, 20, 60);
-            ctx.fillRect(w/2 + 40, h/2 - 40, 20, 60);
-            ctx.fillStyle = "#888";
-            ctx.fillRect(w/2 - 70, h/2 - 35, 40, 15);
-            ctx.fillRect(w/2 + 30, h/2 - 35, 40, 15);
+            // 并联：上支路装 R1，下支路装 R2
+            const upperY = circuitY - 32;
+            const lowerY = circuitY + 32;
+            const branchLeft = w * 0.4;
+            const branchRight = w * 0.75;
+
+            ctx.beginPath();
+            ctx.moveTo(branchLeft, circuitY);
+            ctx.lineTo(branchLeft, upperY);
+            ctx.lineTo(branchRight, upperY);
+            ctx.lineTo(branchRight, circuitY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(branchLeft, circuitY);
+            ctx.lineTo(branchLeft, lowerY);
+            ctx.lineTo(branchRight, lowerY);
+            ctx.lineTo(branchRight, circuitY);
+            ctx.stroke();
+
+            const midX = (branchLeft + branchRight) / 2;
+            drawResistor(ctx, midX, upperY, "#888");
+            drawResistor(ctx, midX, lowerY, "#888");
             ctx.fillStyle = "#000";
-            ctx.fillText("R1", w/2 - 60, h/2 - 25);
-            ctx.fillText("R2", w/2 + 40, h/2 - 25);
+            ctx.font = "12px Arial";
+            ctx.fillText("R1", midX - 20, upperY - 14);
+            ctx.fillText("R2", midX - 20, lowerY - 14);
         }
-        
-        const { I1, I2, I, U1, U2, U } = getCurrents();
+
+        const textX = 20;
+        let currentY = h * 0.62;      // 行起始 Y
+        const lineHeight = 22;        // 行间距
+
+        // 第一行：模式标题
         ctx.fillStyle = "#2c2418";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText(`模式: ${mode === "series" ? "串联" : "并联"}`, 50, 60);
-        ctx.fillText(`电源电压 U = ${U.toFixed(1)} V`, 50, 100);
-        ctx.fillText(`R1 = ${r1.toFixed(0)} Ω, R2 = ${r2.toFixed(0)} Ω`, 50, 140);
-        ctx.fillStyle = "#e63946";
-        ctx.fillText(`电流: I1 = ${I1.toFixed(2)} A, I2 = ${I2.toFixed(2)} A, 总 I = ${I.toFixed(2)} A`, 50, 180);
-        ctx.fillText(`电压: U1 = ${U1.toFixed(1)} V, U2 = ${U2.toFixed(1)} V`, 50, 220);
+        ctx.font = "bold 15px Arial";
+        ctx.fillText(`当前模式: ${mode === "series" ? "串联" : "并联"}`, textX, currentY);
+        currentY += lineHeight + 4;
+
+        // 第二行：电源电压
+        ctx.font = "14px Arial";
+        ctx.fillText(`电源电压 U = ${voltage.toFixed(1)} V`, textX, currentY);
+        currentY += lineHeight;
+
+        // 第三行：电阻值
+        ctx.fillText(`R1 = ${r1} Ω,  R2 = ${r2} Ω`, textX, currentY);
+        currentY += lineHeight + 6;
+
+        // 根据读数状态显示结果或提示
+        if (readingTaken) {
+            ctx.fillStyle = "#e63946";   // 红色
+            ctx.font = "bold 14px Arial";
+
+            // 电流行
+            ctx.fillText(`电流: I1 = ${displayI1.toFixed(2)} A, I2 = ${displayI2.toFixed(2)} A`, textX, currentY);
+            currentY += lineHeight;
+            ctx.fillText(`总电流 I = ${displayI.toFixed(2)} A`, textX, currentY);
+            currentY += lineHeight + 2;
+
+            // 电压行
+            ctx.fillText(`电压: U1 = ${displayU1.toFixed(1)} V, U2 = ${displayU2.toFixed(1)} V`, textX, currentY);
+            currentY += lineHeight;
+        } else {
+            ctx.fillStyle = "#999";
+            ctx.font = "italic 14px Arial";
+            ctx.fillText("点击下方【读数】按钮获取测量数据", textX, currentY);
+            currentY += lineHeight;
+            ctx.fillText("电流: -- A    电压: -- V", textX, currentY);
+        }
+
+        // 底部规律提示（靠最下）
+        ctx.fillStyle = "#aaa";
+        ctx.font = "12px Arial";
+        ctx.fillText("串联：I1 = I2，U = U1 + U2  |  并联：U1 = U2，I = I1 + I2", textX, h - 12);
     }
-    
-    const seriesBtn = document.getElementById("seriesBtn");
-    const parallelBtn = document.getElementById("parallelBtn");
-    const r1Slider = document.getElementById("circuitR1");
-    const r2Slider = document.getElementById("circuitR2");
-    const r1Val = document.getElementById("circuitR1Val");
-    const r2Val = document.getElementById("circuitR2Val");
-    
-    if (seriesBtn && !seriesBtn.hasListener) {
-        seriesBtn.onclick = () => { mode = "series"; draw(); };
-        parallelBtn.onclick = () => { mode = "parallel"; draw(); };
-        r1Slider.addEventListener("input", (e) => {
-            r1 = parseFloat(e.target.value);
-            r1Val.innerText = r1.toFixed(0);
-            draw();
-        });
-        r2Slider.addEventListener("input", (e) => {
-            r2 = parseFloat(e.target.value);
-            r2Val.innerText = r2.toFixed(0);
-            draw();
-        });
-        seriesBtn.hasListener = true;
+
+    // 电阻符号绘制函数
+    function drawResistor(ctx, x, y, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x - 20, y);
+        ctx.lineTo(x - 10, y - 10);
+        ctx.lineTo(x, y + 10);
+        ctx.lineTo(x + 10, y - 10);
+        ctx.lineTo(x + 20, y);
+        ctx.stroke();
     }
-    
+
+    // ---------- 绑定 UI 事件 ----------
+    document.getElementById("seriesBtn").onclick = () => {
+        mode = "series";
+        readingTaken = false;
+        draw();
+    };
+    document.getElementById("parallelBtn").onclick = () => {
+        mode = "parallel";
+        readingTaken = false;
+        draw();
+    };
+    document.getElementById("circuitR1").oninput = function() {
+        r1 = parseInt(this.value, 10);
+        document.getElementById("circuitR1Val").innerText = r1;
+        readingTaken = false;
+        draw();
+    };
+    document.getElementById("circuitR2").oninput = function() {
+        r2 = parseInt(this.value, 10);
+        document.getElementById("circuitR2Val").innerText = r2;
+        readingTaken = false;
+        draw();
+    };
+    document.getElementById("circuitReadBtn").onclick = () => {
+        const data = calc();
+        displayI = data.I;
+        displayI1 = data.I1;
+        displayI2 = data.I2;
+        displayU1 = data.U1;
+        displayU2 = data.U2;
+        readingTaken = true;
+        draw();
+    };
+
+    // 窗口大小改变时重绘
     window.addEventListener("resize", () => draw());
     draw();
 }
@@ -4884,7 +5040,9 @@ function startSolenoidAnimation() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     
-    let currentDirection = "right";   // "right" 或 "left"
+    let currentDirection = "right";
+    let animFrame = null;
+    let flowOffset = 0;
     
     function draw() {
         const w = canvas.clientWidth;
@@ -4897,83 +5055,127 @@ function startSolenoidAnimation() {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, w, h);
         
-        // 螺线管
+        const coilY = h/2 - 30;
+        const coilH = 60;
+        const wireSpacing = 20;
+        const wireWidth = 8;
+        
+        // 螺线管外壳
         ctx.fillStyle = "#aaa";
-        ctx.fillRect(w/2 - 120, h/2 - 30, 240, 60);
-        ctx.fillStyle = "#888";
+        ctx.fillRect(w/2 - 120, coilY, 240, coilH);
+        
+        // 绘制导线截面及单个表示流入方向的箭头
+        // 箭头方向：电流向右时，箭头向上（流入）；电流向左时，箭头向下（流入）
+        const arrowDir = (currentDirection === "right") ? -1 : 1;  // -1向上，1向下
         for (let i = -5; i <= 5; i++) {
-            ctx.fillRect(w/2 + i * 20, h/2 - 35, 8, 70);
+            const x = w/2 + i * wireSpacing;
+            // 导线截面
+            ctx.fillStyle = "#888";
+            ctx.fillRect(x - wireWidth/2, coilY - 5, wireWidth, coilH + 10);
+            // 单个箭头（红色，位于截面中央）
+            drawMovingArrow(ctx, x, coilY + coilH/2, arrowDir, "#e74c3c", flowOffset);
         }
         
-        // 电流方向箭头
-        ctx.fillStyle = "#e74c3c";
-        if (currentDirection === "right") {
-            ctx.fillRect(w/2 - 130, h/2 - 10, 20, 20);
-            ctx.fillRect(w/2 + 110, h/2 - 10, 20, 20);
-            ctx.fillText("→", w/2 - 140, h/2);
-            ctx.fillText("→", w/2 + 100, h/2);
-        } else {
-            ctx.fillRect(w/2 + 110, h/2 - 10, 20, 20);
-            ctx.fillRect(w/2 - 130, h/2 - 10, 20, 20);
-            ctx.fillText("←", w/2 + 100, h/2);
-            ctx.fillText("←", w/2 - 140, h/2);
-        }
-        
-        // 磁场线（椭圆示意）
+        // 外部磁场线
         ctx.beginPath();
         ctx.ellipse(w/2, h/2, 150, 80, 0, 0, 2*Math.PI);
         ctx.setLineDash([5, 5]);
         ctx.strokeStyle = "#3498db";
+        ctx.lineWidth = 2;
         ctx.stroke();
         ctx.setLineDash([]);
         
-        // 磁极
+        // 磁感线方向箭头
         const nPoleX = (currentDirection === "right") ? w/2 + 140 : w/2 - 140;
         const sPoleX = (currentDirection === "right") ? w/2 - 140 : w/2 + 140;
-        ctx.fillStyle = "#e74c3c";
-        ctx.fillText("N", nPoleX, h/2 - 20);
-        ctx.fillStyle = "#3498db";
-        ctx.fillText("S", sPoleX, h/2 - 20);
+        drawFieldArrow(ctx, w/2 + 140, h/2, currentDirection === "right" ? 1 : -1);
+        drawFieldArrow(ctx, w/2 - 140, h/2, currentDirection === "right" ? -1 : 1);
         
-        // 右手定则说明
+        // 磁极标签
+        ctx.fillStyle = "#e74c3c";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("N", nPoleX - 5, h/2 - 25);
+        ctx.fillStyle = "#3498db";
+        ctx.fillText("S", sPoleX - 5, h/2 - 25);
+        
+        // 说明文字
         ctx.fillStyle = "#2c2418";
         ctx.font = "bold 14px Arial";
-        ctx.fillText("右手握住螺线管，四指指向电流方向，拇指指向N极", 50, 60);
-        ctx.fillText(`当前电流方向: ${currentDirection === "right" ? "从左向右" : "从右向左"}`, 50, 100);
+        ctx.fillText("右手握住螺线管，四指指向电流方向，拇指指向N极", 20, 30);
+        ctx.fillText(`电流方向: ${currentDirection === "right" ? "从左向右" : "从右向左"}`, 20, 55);
+    }
+    
+    // 绘制流动箭头（单个）
+    function drawMovingArrow(ctx, x, centerY, dir, color, offset) {
+        const arrowLen = 12;
+        const headSize = 5;
+        const moveRange = 8;
+        const yShift = (offset % moveRange) - moveRange/2;
+        const baseY = centerY + dir * yShift;
+        
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2;
+        
+        // 箭头杆
+        ctx.beginPath();
+        ctx.moveTo(x, baseY + dir * arrowLen/2);
+        ctx.lineTo(x, baseY - dir * arrowLen/2);
+        ctx.stroke();
+        // 箭头头部
+        ctx.beginPath();
+        ctx.moveTo(x - headSize, baseY - dir * (arrowLen/2 - headSize));
+        ctx.lineTo(x, baseY - dir * arrowLen/2);
+        ctx.lineTo(x + headSize, baseY - dir * (arrowLen/2 - headSize));
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    // 磁场方向箭头
+    function drawFieldArrow(ctx, x, y, direction) {
+        const sign = direction > 0 ? 1 : -1;
+        const size = 10;
+        ctx.fillStyle = "#3498db";
+        ctx.beginPath();
+        ctx.moveTo(x + sign * size, y);
+        ctx.lineTo(x - sign * size, y - size/2);
+        ctx.lineTo(x - sign * size, y + size/2);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    function animate() {
+        flowOffset += 0.8;
+        if (flowOffset > 20) flowOffset = 0;
+        draw();
+        animFrame = requestAnimationFrame(animate);
     }
     
     const leftBtn = document.getElementById("solenoidLeftBtn");
     const rightBtn = document.getElementById("solenoidRightBtn");
-    
     if (leftBtn && !leftBtn.hasListener) {
-        leftBtn.onclick = () => { currentDirection = "left"; draw(); };
-        rightBtn.onclick = () => { currentDirection = "right"; draw(); };
+        leftBtn.onclick = () => { currentDirection = "left"; };
+        rightBtn.onclick = () => { currentDirection = "right"; };
         leftBtn.hasListener = true;
     }
     
     window.addEventListener("resize", () => draw());
-    draw();
+    if (animFrame) cancelAnimationFrame(animFrame);
+    animFrame = requestAnimationFrame(animate);
+    window.__solenoidCleanup = () => { if (animFrame) cancelAnimationFrame(animFrame); };
 }
 
-	//探究导体在磁场中运动时产生感应电流的条件（电磁感应）动画 33
+// 探究导体在磁场中运动时产生感应电流的条件（电磁感应）动画 33
 function startInductionAnimation() {
     const canvas = document.getElementById("inductionCanvas");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     
-    // 物理参数（可调）
-    let B = 0.8;           // 磁感应强度 (T)
-    let L = 0.1;           // 导体有效长度 (m)
-    let R = 10;            // 回路电阻 (Ω)
-    
+    let B = 0.8, L = 0.1, R = 10;
     let magnet = { x: 0, y: 0 };
-    let isDragging = false;
-    let velocity = 0;
-    let lastX = 0;
-    let current = 0;
-    let emf = 0;
+    let isDragging = false, velocity = 0, lastX = 0;
+    let current = 0, emf = 0;
     let animFrame = null;
-    let width = 0, height = 0;
     let coilX = 0, coilWidth = 80;
     
     function calculateValues(v) {
@@ -4984,258 +5186,132 @@ function startInductionAnimation() {
     }
     
     function draw() {
-        width = canvas.clientWidth;
-        height = canvas.clientHeight;
-        canvas.width = width;
-        canvas.height = height;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        canvas.width = w;
+        canvas.height = h;
+        coilX = w/2 - 40;
         
-        coilX = width/2 - 40;
-        const coilY = height/2 - 50;
-        
-        ctx.clearRect(0, 0, width, height);
+        ctx.clearRect(0, 0, w, h);
         const bgColor = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
         ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, 0, w, h);
         
-        // 均匀磁场区域
-        ctx.fillStyle = "rgba(52, 152, 219, 0.08)";
-        ctx.fillRect(coilX - 40, height/2 - 70, coilWidth + 80, 140);
+        // 磁场区域
+        ctx.fillStyle = "rgba(52,152,219,0.08)";
+        ctx.fillRect(coilX - 40, h/2 - 70, coilWidth + 80, 140);
         ctx.strokeStyle = "#3498db";
-        ctx.setLineDash([5, 5]);
-        ctx.strokeRect(coilX - 40, height/2 - 70, coilWidth + 80, 140);
+        ctx.setLineDash([5,5]);
+        ctx.strokeRect(coilX - 40, h/2 - 70, coilWidth + 80, 140);
         ctx.setLineDash([]);
         
         // 磁感线
-        ctx.strokeStyle = "#3498db";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 4]);
         for (let i = 0; i < 6; i++) {
             const x = coilX - 30 + i * 25;
             ctx.beginPath();
-            ctx.moveTo(x, height/2 - 60);
-            ctx.lineTo(x, height/2 + 60);
+            ctx.moveTo(x, h/2 - 60);
+            ctx.lineTo(x, h/2 + 60);
+            ctx.strokeStyle = "#3498db";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2,4]);
             ctx.stroke();
+            ctx.setLineDash([]);
         }
-        ctx.setLineDash([]);
         
         // 线圈
         ctx.fillStyle = "#bdc3c7";
-        ctx.fillRect(coilX, height/2 - 50, coilWidth, 100);
+        ctx.fillRect(coilX, h/2 - 50, coilWidth, 100);
         ctx.strokeStyle = "#2c3e50";
         ctx.lineWidth = 3;
-        ctx.strokeRect(coilX, height/2 - 50, coilWidth, 100);
-        ctx.fillStyle = "#2c3e50";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText("线圈", coilX + 20, height/2);
-        ctx.font = "12px Arial";
-        ctx.fillText(`L = ${L.toFixed(2)} m`, coilX + 15, height/2 + 25);
-        
-        ctx.fillStyle = "#3498db";
-        ctx.font = "bold 12px Arial";
-        ctx.fillText(`B = ${B.toFixed(2)} T`, coilX - 20, height/2 - 75);
+        ctx.strokeRect(coilX, h/2 - 50, coilWidth, 100);
         
         // 磁铁
-        const magnetCenter = magnet.x + 40;
+        const mX = magnet.x, mY = magnet.y;
         ctx.fillStyle = "#e74c3c";
-        ctx.fillRect(magnet.x, magnet.y, 40, 60);
+        ctx.fillRect(mX, mY, 40, 60);
         ctx.fillStyle = "#3498db";
-        ctx.fillRect(magnet.x + 40, magnet.y, 40, 60);
+        ctx.fillRect(mX + 40, mY, 40, 60);
         ctx.fillStyle = "#fff";
         ctx.font = "bold 14px Arial";
-        ctx.fillText("N", magnet.x + 10, magnet.y + 25);
-        ctx.fillText("S", magnet.x + 50, magnet.y + 25);
+        ctx.fillText("N", mX + 10, mY + 25);
+        ctx.fillText("S", mX + 50, mY + 25);
         
-        // 速度矢量
+        // 速度箭头
         if (Math.abs(velocity) > 0.3) {
-            const arrowX = magnetCenter;
-            const arrowY = magnet.y - 25;
-            const arrowLen = velocity * 6;
+            const arrowX = mX + 40, arrowY = mY - 20;
+            const len = velocity * 5;
             ctx.beginPath();
             ctx.moveTo(arrowX, arrowY);
-            ctx.lineTo(arrowX + arrowLen, arrowY);
+            ctx.lineTo(arrowX + len, arrowY);
             ctx.strokeStyle = "#e67e22";
             ctx.lineWidth = 3;
             ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(arrowX + arrowLen, arrowY);
-            ctx.lineTo(arrowX + arrowLen - 8 * Math.sign(velocity), arrowY - 5);
-            ctx.lineTo(arrowX + arrowLen - 8 * Math.sign(velocity), arrowY + 5);
-            ctx.fillStyle = "#e67e22";
-            ctx.fill();
-            ctx.fillStyle = "#e67e22";
-            ctx.font = "bold 12px Arial";
-            const speedMs = (Math.abs(velocity) * 0.03).toFixed(2);
-            ctx.fillText(`${speedMs} m/s`, arrowX + arrowLen/2 - 15, arrowY - 8);
         }
         
         // 电流表
-        const meterX = width - 100;
-        const meterY = height/2;
+        const meterX = w - 100, meterY = h/2;
         ctx.beginPath();
-        ctx.arc(meterX, meterY, 45, 0, 2*Math.PI);
+        ctx.arc(meterX, meterY, 40, 0, 2*Math.PI);
         ctx.fillStyle = "#ecf0f1";
         ctx.fill();
-        ctx.strokeStyle = "#2c3e50";
-        ctx.lineWidth = 2;
         ctx.stroke();
-        
-        for (let i = -2; i <= 2; i++) {
-            const tickAngle = i * 0.35;
-            const tickX = meterX + 35 * Math.sin(tickAngle);
-            const tickY = meterY - 35 * Math.cos(tickAngle);
-            ctx.fillStyle = "#2c3e50";
-            ctx.font = "10px Arial";
-            ctx.fillText((i*0.2).toFixed(1), tickX - 8, tickY + 3);
-        }
-        
-        const maxCurrent = 0.5;
-        const angle = (current / maxCurrent) * 0.8;
-        const needleX = meterX + 30 * Math.sin(angle);
-        const needleY = meterY - 30 * Math.cos(angle);
+        const angle = (current / 0.5) * 0.8;
+        const nx = meterX + 32 * Math.sin(angle);
+        const ny = meterY - 32 * Math.cos(angle);
         ctx.beginPath();
         ctx.moveTo(meterX, meterY);
-        ctx.lineTo(needleX, needleY);
+        ctx.lineTo(nx, ny);
         ctx.strokeStyle = "#e74c3c";
         ctx.lineWidth = 3;
         ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(meterX, meterY, 4, 0, 2*Math.PI);
-        ctx.fillStyle = "#e74c3c";
-        ctx.fill();
-        ctx.fillStyle = "#2c2418";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText(`${Math.abs(current).toFixed(3)} A`, meterX - 25, meterY + 55);
         
-        // 数据面板
+        // 数据
         ctx.fillStyle = "#2c2418";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText("📊 实时数据", 20, 40);
-        ctx.font = "13px Arial";
-        ctx.fillText(`感应电动势 E = BLv = ${Math.abs(emf).toFixed(3)} V`, 20, 70);
-        ctx.fillText(`感应电流 I = E/R = ${Math.abs(current).toFixed(3)} A`, 20, 100);
-        ctx.fillText(`方向: ${current > 0 ? "正向 →" : current < 0 ? "反向 ←" : "无"}`, 20, 130);
-        ctx.fillText(`磁通量变化率 dΦ/dt = ${Math.abs(emf).toFixed(3)} Wb/s`, 20, 160);
-        
-        if (Math.abs(velocity) > 0.3) {
-            ctx.fillStyle = "#e63946";
-            ctx.font = "bold 13px Arial";
-            ctx.fillText("⚡ 切割磁感线，产生感应电流", 20, 200);
-        } else {
-            ctx.fillStyle = "#7f8c8d";
-            ctx.font = "13px Arial";
-            ctx.fillText("静止，无感应电流", 20, 200);
-        }
-    }
-    
-    function updateValues() {
-        const coilLeft = coilX;
-        const coilRight = coilX + coilWidth;
-        const magnetCenter = magnet.x + 40;
-        if (magnetCenter > coilLeft - 30 && magnetCenter < coilRight + 30) {
-            const vals = calculateValues(velocity);
-            emf = vals.emf;
-            current = vals.current;
-        } else {
-            emf = 0;
-            current = 0;
-        }
+        ctx.font = "bold 13px Arial";
+        ctx.fillText(`E = ${Math.abs(emf).toFixed(3)} V`, 20, 30);
+        ctx.fillText(`I = ${Math.abs(current).toFixed(3)} A`, 20, 55);
     }
     
     function animate() {
         if (isDragging) {
             velocity = (magnet.x - lastX) * 1.5;
             lastX = magnet.x;
-            updateValues();
         } else {
             velocity *= 0.92;
             if (Math.abs(velocity) < 0.1) velocity = 0;
-            updateValues();
         }
+        const vals = calculateValues(velocity);
+        emf = vals.emf; current = vals.current;
         draw();
         animFrame = requestAnimationFrame(animate);
     }
     
-    // 拖拽交互（鼠标 + 触摸）
-    function handleDragStart(e) {
+    canvas.addEventListener("mousedown", (e) => {
         const rect = canvas.getBoundingClientRect();
-        const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-        const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-        const mouseX = (clientX - rect.left) * (canvas.width / rect.width);
-        const mouseY = (clientY - rect.top) * (canvas.height / rect.height);
-        if (mouseX >= magnet.x && mouseX <= magnet.x + 80 && mouseY >= magnet.y && mouseY <= magnet.y + 60) {
+        const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+        if (mx >= magnet.x && mx <= magnet.x + 80 && my >= magnet.y && my <= magnet.y + 60) {
             isDragging = true;
             lastX = magnet.x;
-            canvas.style.cursor = "grabbing";
             e.preventDefault();
         }
-    }
-    function handleDragMove(e) {
-        if (isDragging) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-            const mouseX = (clientX - rect.left) * (canvas.width / rect.width);
-            magnet.x = Math.min(Math.max(mouseX - 40, 20), canvas.width - 100);
-            e.preventDefault();
-        }
-    }
-    function handleDragEnd() {
-        isDragging = false;
-        canvas.style.cursor = "default";
-    }
-    
-    canvas.addEventListener("mousedown", handleDragStart);
-    window.addEventListener("mousemove", handleDragMove);
-    window.addEventListener("mouseup", handleDragEnd);
-    canvas.addEventListener("touchstart", handleDragStart);
-    canvas.addEventListener("touchmove", handleDragMove);
-    canvas.addEventListener("touchend", handleDragEnd);
-    
-    // 参数控制面板（只添加一次）
-    let ctrlDiv = canvas.parentNode.querySelector(".induction-params");
-    if (!ctrlDiv) {
-        ctrlDiv = document.createElement("div");
-        ctrlDiv.className = "induction-params";
-        ctrlDiv.innerHTML = `
-            <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; margin-top:10px;">
-                <div>B: <input type="range" id="inductionB" min="0.2" max="1.5" step="0.1" value="0.8"> <span id="inductionBVal">0.8</span> T</div>
-                <div>L: <input type="range" id="inductionL" min="0.05" max="0.3" step="0.01" value="0.1"> <span id="inductionLVal">0.10</span> m</div>
-                <div>R: <input type="range" id="inductionR" min="1" max="50" step="1" value="10"> <span id="inductionRVal">10</span> Ω</div>
-                <button id="inductionReset" class="btn" style="padding:4px 12px;">⟲ 复位</button>
-            </div>
-        `;
-        canvas.parentNode.appendChild(ctrlDiv);
-    }
-    
-    const bSlider = document.getElementById("inductionB");
-    const lSlider = document.getElementById("inductionL");
-    const rSlider = document.getElementById("inductionR");
-    const resetBtn = document.getElementById("inductionReset");
-    
-    if (bSlider && !bSlider.hasListener) {
-        bSlider.addEventListener("input", (e) => { B = parseFloat(e.target.value); document.getElementById("inductionBVal").innerText = B.toFixed(2); updateValues(); draw(); });
-        lSlider.addEventListener("input", (e) => { L = parseFloat(e.target.value); document.getElementById("inductionLVal").innerText = L.toFixed(2); updateValues(); draw(); });
-        rSlider.addEventListener("input", (e) => { R = parseFloat(e.target.value); document.getElementById("inductionRVal").innerText = R.toFixed(1); updateValues(); draw(); });
-        resetBtn.onclick = () => {
-            magnet.x = canvas.width/2 - 80;
-            velocity = 0;
-            emf = 0;
-            current = 0;
-            lastX = magnet.x;
-            draw();
-        };
-        bSlider.hasListener = true;
-    }
-    
-    // 初始化位置
-    magnet.x = canvas.clientWidth/2 - 80;
-    magnet.y = canvas.clientHeight/2 - 30;
-    lastX = magnet.x;
-    
-    window.addEventListener("resize", () => { 
-        magnet.x = canvas.clientWidth/2 - 80;
-        magnet.y = canvas.clientHeight/2 - 30;
-        draw(); 
     });
+    window.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+        magnet.x = Math.min(Math.max(mx - 40, 20), canvas.width - 100);
+    });
+    window.addEventListener("mouseup", () => { isDragging = false; });
+    
+    // 初始化磁铁位置
+    setTimeout(() => {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        magnet.x = w/2 - 80;
+        magnet.y = h/2 - 30;
+        lastX = magnet.x;
+        draw();
+    }, 50);
     
     if (animFrame) cancelAnimationFrame(animFrame);
     animFrame = requestAnimationFrame(animate);
@@ -5428,6 +5504,7 @@ function startResistivityAnimation() {
     draw();
 }
 
+
 	//用多用电表测量电学中的物理量动画 36
 function startMultimeterAnimation() {
     const canvas = document.getElementById("multimeterCanvas");
@@ -5569,8 +5646,11 @@ function startEmfAnimation() {
     let r = 1.0;   // Ω
     let R = 5.0;   // Ω
     
-    function getI() { return E / (R + r); }
-    function getU() { return E - getI() * r; }
+    const I_max = 8;
+    const U_max = 12;
+    
+    function getLoadCurrent() { return E / (R + r); }
+    function getLoadVoltage() { return E - getLoadCurrent() * r; }
     
     function draw() {
         const w = canvas.clientWidth;
@@ -5583,27 +5663,95 @@ function startEmfAnimation() {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, w, h);
         
-        // U-I 图像（示意）
-        const I = getI();
-        const U = getU();
-        ctx.beginPath();
-        ctx.moveTo(50, h - 50 - (E - 0) / E * 200);
-        ctx.lineTo(w - 50, h - 50 - (E - I * r) / E * 200);
-        ctx.strokeStyle = "#e74c3c";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillStyle = "#000";
-        ctx.fillText("U/V", w - 30, 50);
-        ctx.fillText("I/A", 50, h - 30);
+        // 绘图区域：为下方数据留出充足空间
+        const left = 60, right = w - 30;
+        const top = 25;
+        const bottom = h - 90;
+        const graphW = right - left;
+        const graphH = bottom - top;
         
-        // 数据
-        ctx.fillStyle = "#2c2418";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText(`电动势 E = ${E.toFixed(2)} V`, 50, 60);
-        ctx.fillText(`内阻 r = ${r.toFixed(2)} Ω`, 50, 100);
-        ctx.fillText(`负载 R = ${R.toFixed(2)} Ω`, 50, 140);
-        ctx.fillText(`电流 I = E/(R+r) = ${I.toFixed(3)} A`, 50, 180);
-        ctx.fillText(`路端电压 U = E - I·r = ${U.toFixed(2)} V`, 50, 220);
+        // 网格线
+        ctx.strokeStyle = "#ddd";
+        ctx.lineWidth = 0.5;
+        const stepsX = 5, stepsY = 5;
+        for (let i = 0; i <= stepsX; i++) {
+            const x = left + (i / stepsX) * graphW;
+            ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke();
+        }
+        for (let i = 0; i <= stepsY; i++) {
+            const y = top + (i / stepsY) * graphH;
+            ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+        }
+        
+        // 坐标轴
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(left, bottom); ctx.lineTo(right, bottom);
+        ctx.moveTo(left, bottom); ctx.lineTo(left, top);
+        ctx.stroke();
+        
+        // 轴标签
+        ctx.fillStyle = "#333";
+        ctx.font = "12px Arial";
+        ctx.fillText("I / A", right + 5, bottom + 4);
+        ctx.fillText("U / V", left - 30, top - 8);
+        
+        // 刻度
+        ctx.textAlign = "center";
+        for (let i = 0; i <= stepsX; i++) {
+            const val = (I_max * i / stepsX).toFixed(1);
+            const x = left + (i / stepsX) * graphW;
+            ctx.beginPath(); ctx.moveTo(x, bottom); ctx.lineTo(x, bottom + 5); ctx.stroke();
+            ctx.fillText(val, x, bottom + 18);
+        }
+        ctx.textAlign = "right";
+        for (let i = 0; i <= stepsY; i++) {
+            const val = (U_max * (stepsY - i) / stepsY).toFixed(1);
+            const y = top + (i / stepsY) * graphH;
+            ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left - 5, y); ctx.stroke();
+            ctx.fillText(val, left - 8, y + 4);
+        }
+        ctx.textAlign = "start";
+        
+        // U-I 直线
+        let I_start = 0;
+        let I_end = I_max;
+        if (E - r * I_end < 0) { I_end = E / r; }
+        
+        const x1 = left + (I_start / I_max) * graphW;
+        const y1 = bottom - ((E - r * I_start) / U_max) * graphH;
+        const x2 = left + (I_end / I_max) * graphW;
+        const y2 = bottom - ((E - r * I_end) / U_max) * graphH;
+        
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 2.5; ctx.stroke();
+        
+        // 工作点
+        const I_now = getLoadCurrent();
+        const U_now = getLoadVoltage();
+        if (I_now >= 0 && I_now <= I_max && U_now >= 0 && U_now <= U_max) {
+            const px = left + (I_now / I_max) * graphW;
+            const py = bottom - (U_now / U_max) * graphH;
+            ctx.beginPath(); ctx.arc(px, py, 6, 0, 2*Math.PI);
+            ctx.fillStyle = "#3498db"; ctx.fill();
+            ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+        
+        // 数据面板（独立于图形下方）
+        const textX = 20;
+        const textY = bottom + 30;
+        const lines = [
+            { text: `电动势 E = ${E.toFixed(2)} V`, color: "#2c2418" },
+            { text: `内阻 r = ${r.toFixed(2)} Ω`, color: "#2c2418" },
+            { text: `负载 R = ${R.toFixed(2)} Ω`, color: "#2c2418" },
+            { text: `电流 I = ${I_now.toFixed(3)} A`, color: "#e63946" },
+            { text: `路端电压 U = ${U_now.toFixed(2)} V`, color: "#e63946" }
+        ];
+        lines.forEach((item, i) => {
+            ctx.fillStyle = item.color;
+            ctx.fillText(item.text, textX, textY + i * 20);
+        });
     }
     
     const eSlider = document.getElementById("emfE");
@@ -5630,65 +5778,196 @@ function startLenzAnimation() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     
-    let direction = "in";      // "in" 或 "out"
-    let currentDirection = 0;  // 1正向，-1反向
+    let magnetY = 50; // 磁铁初始Y坐标（将在draw中动态调整）
+    let isDragging = false;
+    let lastY = 0;
+    let currentDirection = 0; // 1正向，-1反向
+    let animFrame = null;
+    let width = 0, height = 0;
+    let coilY = 0, coilHeight = 80; // 线圈位置
     
     function draw() {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        canvas.width = w;
-        canvas.height = h;
+        width = canvas.clientWidth;
+        height = canvas.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
         
-        ctx.clearRect(0, 0, w, h);
+        ctx.clearRect(0, 0, width, height);
         const bgColor = getComputedStyle(document.body).getPropertyValue('--bg-light').trim() || "#fef9f0";
         ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, w, h);
+        ctx.fillRect(0, 0, width, height);
         
-        // 线圈
+        // 线圈位置（画布中心偏左）
+        coilY = height/2 - coilHeight/2;
+        const coilX = width/2 - 60 - 40; // 向左偏移
         ctx.fillStyle = "#aaa";
-        ctx.fillRect(w/2 - 40, h/2 - 40, 80, 80);
+        ctx.fillRect(coilX, coilY, 80, coilHeight);
         ctx.fillStyle = "#000";
-        ctx.fillText("线圈", w/2 - 15, h/2);
+        ctx.font = "bold 12px Arial";
+        ctx.fillText("线圈", coilX + 20, coilY + coilHeight/2 + 5);
         
-        // 磁铁
-        let magnetY = (direction === "in") ? h/2 - 80 : h/2 + 40;
+        // 磁铁（y坐标限制在线圈上方一定范围，可以拖拽穿过线圈）
+        const magnetWidth = 40;
+        const magnetHeight = 60;
+        // 限制 magnetY 范围
+        magnetY = Math.max(20, Math.min(height - magnetHeight - 20, magnetY));
+        const magnetX = width/2 - 20;
+        
+        // 绘制磁铁 (N红 S蓝)
         ctx.fillStyle = "#e74c3c";
-        ctx.fillRect(w/2 - 20, magnetY, 40, 60);
+        ctx.fillRect(magnetX, magnetY, magnetWidth, magnetHeight/2);
+        ctx.fillStyle = "#3498db";
+        ctx.fillRect(magnetX, magnetY + magnetHeight/2, magnetWidth, magnetHeight/2);
         ctx.fillStyle = "#fff";
-        ctx.fillText("N", w/2 - 10, magnetY + 15);
-        ctx.fillText("S", w/2 - 10, magnetY + 45);
+        ctx.font = "bold 14px Arial";
+        ctx.fillText("N", magnetX + 12, magnetY + 25);
+        ctx.fillText("S", magnetX + 12, magnetY + 50);
         
-        // 电流计指针
-        let angle = (currentDirection === 1) ? -0.5 : (currentDirection === -1) ? 0.5 : 0;
-        let needleX = w/2 + 100 + 30 * Math.cos(angle);
-        let needleY = h/2 + 30 * Math.sin(angle);
-        ctx.beginPath();
-        ctx.moveTo(w/2 + 100, h/2);
-        ctx.lineTo(needleX, needleY);
-        ctx.strokeStyle = "#e74c3c";
-        ctx.stroke();
-        ctx.fillStyle = "#2c2418";
-        ctx.fillText("电流计", w/2 + 85, h/2 - 20);
-        
-        // 说明
+        // 文字说明（左上角，不重叠）
         ctx.fillStyle = "#2c2418";
         ctx.font = "bold 14px Arial";
-        ctx.fillText(`磁铁${direction === "in" ? "插入" : "拔出"}线圈`, 50, 60);
-        ctx.fillText(`感应电流方向: ${currentDirection === 1 ? "正向" : currentDirection === -1 ? "反向" : "无"}`, 50, 100);
-        ctx.fillText("楞次定律：感应电流的磁场阻碍原磁场的变化", 50, 140);
+        ctx.fillText("拖拽磁铁模拟插入/拔出线圈", 30, 30);
+        ctx.fillText(`感应电流方向: ${currentDirection === 1 ? "正向" : currentDirection === -1 ? "反向" : "无"}`, 30, 55);
+        ctx.fillText("楞次定律：感应电流的磁场阻碍原磁场的变化", 30, 80);
+        
+        // 电流表（右侧）
+        const meterX = width - 70;
+        const meterY = height/2;
+        const meterRadius = 35;
+        ctx.beginPath();
+        ctx.arc(meterX, meterY, meterRadius, 0, 2*Math.PI);
+        ctx.fillStyle = "#ecf0f1";
+        ctx.fill();
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.fillStyle = "#2c3e50";
+        ctx.font = "9px Arial";
+        for (let i = -2; i <= 2; i++) {
+            const angle = Math.PI/2 + i * 0.4;
+            const tx = meterX + (meterRadius-20) * Math.cos(angle);
+            const ty = meterY - (meterRadius-20) * Math.sin(angle);
+            ctx.fillText((i*0.2).toFixed(1), tx-6, ty+3);
+            // 小刻度线
+            ctx.beginPath();
+            ctx.moveTo(meterX + (meterRadius-6) * Math.cos(angle), meterY - (meterRadius-6) * Math.sin(angle));
+            ctx.lineTo(meterX + (meterRadius-14) * Math.cos(angle), meterY - (meterRadius-14) * Math.sin(angle));
+            ctx.strokeStyle = "#2c3e50";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        
+        // 指针
+        const pointerAngle = (currentDirection === 1) ? Math.PI/2 + 0.6 : (currentDirection === -1) ? Math.PI/2 - 0.6 : Math.PI/2;
+        const needleX = meterX + (meterRadius-10) * Math.cos(pointerAngle);
+        const needleY = meterY - (meterRadius-10) * Math.sin(pointerAngle);
+        ctx.beginPath();
+        ctx.moveTo(meterX, meterY);
+        ctx.lineTo(needleX, needleY);
+        ctx.strokeStyle = "#e74c3c";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(meterX, meterY, 3, 0, 2*Math.PI);
+        ctx.fillStyle = "#e74c3c";
+        ctx.fill();
+        ctx.fillStyle = "#2c2418";
+        ctx.font = "12px Arial";
+        ctx.fillText("灵敏电流计", meterX - 25, meterY + meterRadius + 15);
     }
     
+    function updateCurrent(vel) {
+        // 根据移动方向设置电流方向：向下（插入）为负，向上（拔出）为正
+        if (Math.abs(vel) > 0.5) {
+            currentDirection = vel > 0 ? -1 : 1;
+        } else {
+            // 缓慢时归零
+            currentDirection = 0;
+        }
+    }
+    
+    // 拖拽事件处理
+    function handleDragStart(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const mx = (clientX - rect.left) * (canvas.width / rect.width);
+        const my = (clientY - rect.top) * (canvas.height / rect.height);
+        if (mx >= width/2 - 20 && mx <= width/2 + 20 && my >= magnetY && my <= magnetY + 60) {
+            isDragging = true;
+            lastY = my;
+            canvas.style.cursor = "grabbing";
+            e.preventDefault();
+        }
+    }
+    function handleDragMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const my = (clientY - rect.top) * (canvas.height / rect.height);
+        const dy = my - lastY;
+        magnetY += dy;
+        updateCurrent(dy);
+        lastY = my;
+        draw();
+    }
+    function handleDragEnd() {
+        isDragging = false;
+        canvas.style.cursor = "default";
+    }
+    
+    // 鼠标事件
+    canvas.addEventListener("mousedown", handleDragStart);
+    window.addEventListener("mousemove", handleDragMove);
+    window.addEventListener("mouseup", handleDragEnd);
+    // 触摸事件
+    canvas.addEventListener("touchstart", handleDragStart);
+    canvas.addEventListener("touchmove", handleDragMove);
+    canvas.addEventListener("touchend", handleDragEnd);
+    
+    // 保存监听器引用以便移除（可选，但此次不需要重复绑定）
+    if (canvas.__lenzListeners) {
+        // 移除旧的
+        canvas.removeEventListener("mousedown", canvas.__lenzListeners.mousedown);
+        window.removeEventListener("mousemove", canvas.__lenzListeners.mousemove);
+        window.removeEventListener("mouseup", canvas.__lenzListeners.mouseup);
+        canvas.removeEventListener("touchstart", canvas.__lenzListeners.touchstart);
+        canvas.removeEventListener("touchmove", canvas.__lenzListeners.touchmove);
+        canvas.removeEventListener("touchend", canvas.__lenzListeners.touchend);
+    }
+    canvas.__lenzListeners = {
+        mousedown: handleDragStart,
+        mousemove: handleDragMove,
+        mouseup: handleDragEnd,
+        touchstart: handleDragStart,
+        touchmove: handleDragMove,
+        touchend: handleDragEnd
+    };
+    
+    // 按钮功能（如果存在，提供传统按钮操作，但用不到拖拽时也可以使用）
     const inBtn = document.getElementById("lenzInBtn");
     const outBtn = document.getElementById("lenzOutBtn");
     if (inBtn && !inBtn.hasListener) {
-        inBtn.onclick = () => { direction = "in"; currentDirection = -1; draw(); };
-        outBtn.onclick = () => { direction = "out"; currentDirection = 1; draw(); };
+        inBtn.onclick = () => { 
+            magnetY = height/2 - 80; 
+            currentDirection = -1; 
+            draw(); 
+        };
+        outBtn.onclick = () => { 
+            magnetY = height/2 + 80; 
+            currentDirection = 1; 
+            draw(); 
+        };
         inBtn.hasListener = true;
     }
     
     window.addEventListener("resize", () => draw());
     draw();
 }
+
+
 
 	//探究变压器原、副线圈电压与匝数的关系动画 39
 function startTransformerAnimation() {
@@ -5697,7 +5976,7 @@ function startTransformerAnimation() {
     const ctx = canvas.getContext("2d");
     
     let n1 = 100, n2 = 50;
-    let U1 = 220;   // V
+    let U1 = 220;
     
     function getU2() { return U1 * n2 / n1; }
     
@@ -5712,28 +5991,44 @@ function startTransformerAnimation() {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, w, h);
         
-        // 铁芯
-        ctx.fillStyle = "#888";
-        ctx.fillRect(w/2 - 80, h/2 - 40, 160, 80);
-        // 原副线圈
-        ctx.fillStyle = "#e74c3c";
-        ctx.fillRect(w/2 - 70, h/2 - 35, 60, 70);
-        ctx.fillStyle = "#3498db";
-        ctx.fillRect(w/2 + 10, h/2 - 35, 60, 70);
-        ctx.fillStyle = "#fff";
-        ctx.fillText("原线圈", w/2 - 50, h/2);
-        ctx.fillText("副线圈", w/2 + 25, h/2);
-        
+        // 文字区域（左上，避开图形）
+        const textX = 30;
+        const textStartY = 30;
+        const lineHeight = 22;
         const U2 = getU2();
+        
         ctx.fillStyle = "#2c2418";
         ctx.font = "bold 14px Arial";
-        ctx.fillText(`原线圈匝数 n1 = ${n1}`, 50, 60);
-        ctx.fillText(`副线圈匝数 n2 = ${n2}`, 50, 100);
-        ctx.fillText(`输入电压 U1 = ${U1} V`, 50, 140);
+        ctx.fillText(`原线圈匝数 n1 = ${n1}`, textX, textStartY);
+        ctx.fillText(`副线圈匝数 n2 = ${n2}`, textX, textStartY + lineHeight);
+        ctx.fillText(`输入电压 U1 = ${U1} V`, textX, textStartY + lineHeight * 2);
         ctx.fillStyle = "#e63946";
-        ctx.fillText(`输出电压 U2 = (n2/n1)·U1 = ${U2.toFixed(1)} V`, 50, 180);
+        ctx.fillText(`输出电压 U2 = (n2/n1)·U1 = ${U2.toFixed(1)} V`, textX, textStartY + lineHeight * 3);
         ctx.fillStyle = "#2c2418";
-        ctx.fillText(`电压比 U1/U2 = ${(U1/U2).toFixed(2)} , 匝数比 n1/n2 = ${(n1/n2).toFixed(2)}`, 50, 220);
+        ctx.fillText(`电压比 U1/U2 = ${(U1/U2).toFixed(2)} , 匝数比 n1/n2 = ${(n1/n2).toFixed(2)}`, textX, textStartY + lineHeight * 4);
+        
+        // 图形区域下移，居中绘制
+        const centerY = h * 0.65;   // 将变压器主体放在画布偏下位置
+        const maxWidth = w - 60;
+        const boxWidth = Math.min(160, maxWidth * 0.4);
+        const coilHeight = Math.min(70, (h - textStartY - lineHeight * 5 - 40));
+        
+        // 铁芯
+        ctx.fillStyle = "#888";
+        ctx.fillRect(w/2 - boxWidth/2, centerY - coilHeight/2, boxWidth, coilHeight);
+        
+        // 原线圈（左侧）
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(w/2 - boxWidth/2 - 60, centerY - coilHeight/2 + 5, 50, coilHeight - 10);
+        // 副线圈（右侧）
+        ctx.fillStyle = "#3498db";
+        ctx.fillRect(w/2 + boxWidth/2 + 10, centerY - coilHeight/2 + 5, 50, coilHeight - 10);
+        
+        // 文字标识
+        ctx.fillStyle = "#fff";
+        ctx.font = "12px Arial";
+        ctx.fillText("原线圈", w/2 - boxWidth/2 - 55, centerY + 5);
+        ctx.fillText("副线圈", w/2 + boxWidth/2 + 15, centerY + 5);
     }
     
     const n1Slider = document.getElementById("transformerN1");
@@ -5753,6 +6048,7 @@ function startTransformerAnimation() {
     window.addEventListener("resize", () => draw());
     draw();
 }
+
 
 	//利用传感器制作简单的自动控制装置动画 40
 function startSensorAnimation() {
@@ -6035,85 +6331,92 @@ function startFrictionInvestigationAnimation() {
         let animationHtml = "";
 
 	if (exp.name === "用常见温度计测量温度") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="thermoCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>温度: <input type="range" id="tempSlider" min="-20" max="100" step="1" value="25"><span id="tempValue">25.0</span> °C</div></div><p>👆 调节滑块，观察温度计液柱高度变化</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="thermoCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>温度: <input type="range" id="tempSlider" min="-20" max="100" step="1" value="25"><span id="tempValue">25.0</span> °C</div></div><p> 调节滑块，观察温度计液柱高度变化</p></div>`;
             setTimeout(() => { startThermometerAnimation(); }, 100);
 	} else if (exp.name === "探究等温情况下一定质量气体压强与体积的关系") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="boyleCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>体积: <input type="range" id="boyleVolume" min="100" max="1000" step="10" value="500"><span id="boyleVolumeVal">500</span> mL</div></div><p>👆 调节体积，观察压强变化，验证 pV = 常数</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="boyleCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>体积: <input type="range" id="boyleVolume" min="100" max="1000" step="10" value="500"><span id="boyleVolumeVal">500</span> mL</div></div><p> 调节体积，观察压强变化，验证 pV = 常数</p></div>`;
     setTimeout(() => { startBoyleAnimation(); }, 100);
 	} else if (exp.name === "用电压表测量电压") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="voltmeterCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电压: <input type="range" id="voltageSlider" min="0" max="5" step="0.1" value="3.0"><span id="voltageVal">3.0</span> V</div></div><p>👆 调节电压，观察电压表指针偏转</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="voltmeterCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电压: <input type="range" id="voltageSlider" min="0" max="5" step="0.1" value="3.0"><span id="voltageVal">3.0</span> V</div></div><p> 调节电压，观察电压表指针偏转</p></div>`;
     setTimeout(() => { startVoltmeterAnimation(); }, 100);
 	} else if (exp.name === "探究电流与电压、电阻的关系") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="ohmCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电压 U: <input type="range" id="ohmVoltage" min="0" max="12" step="0.5" value="6.0"><span id="ohmVoltageVal">6.0</span> V</div><div>电阻 R: <input type="range" id="ohmResistance" min="1" max="50" step="1" value="10"><span id="ohmResistanceVal">10</span> Ω</div></div><p>👆 调节电压或电阻，观察电流变化，验证欧姆定律 I = U/R</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="ohmCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电压 U: <input type="range" id="ohmVoltage" min="0" max="12" step="0.5" value="6.0"><span id="ohmVoltageVal">6.0</span> V</div><div>电阻 R: <input type="range" id="ohmResistance" min="1" max="50" step="1" value="10"><span id="ohmResistanceVal">10</span> Ω</div></div><p> 调节电压或电阻，观察电流变化，验证欧姆定律 I = U/R</p></div>`;
     setTimeout(() => { startOhmAnimation(); }, 100);
 	} else if (exp.name === "探究串联电路和并联电路中电流、电压的特点") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="circuitCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="seriesBtn" class="btn">串联</button><button id="parallelBtn" class="btn">并联</button><div>R1: <input type="range" id="circuitR1" min="5" max="50" step="5" value="10"><span id="circuitR1Val">10</span> Ω</div><div>R2: <input type="range" id="circuitR2" min="5" max="50" step="5" value="20"><span id="circuitR2Val">20</span> Ω</div></div><p>👆 选择连接方式，调节电阻，观察电流/电压规律</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3>
+<canvas id="circuitCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas>
+<div class="thermo-control" style="flex-direction:column; align-items:center; gap:8px;">
+  <div>  <button id="seriesBtn" class="btn">串联</button><button id="parallelBtn" class="btn">并联</button>
+  </div><div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;"><span>R1: <input type="range" id="circuitR1" min="5" max="50" step="5" value="10"> <b id="circuitR1Val">10</b> Ω</span>
+  <span>R2: <input type="range" id="circuitR2" min="5" max="50" step="5" value="20"> <b id="circuitR2Val">20</b> Ω</span>
+   </div> <button id="circuitReadBtn" class="btn" style="background:#27ae60; color:#fff; padding:8px 20px; font-weight:bold;">读数</button>
+  </div><p>选择连接方式并调节电阻后，点击【读数】按钮获取测量数据</p></div>`;
     setTimeout(() => { startCircuitAnimation(); }, 100);
 	} else if (exp.name === "探究通电螺线管外部磁场的方向") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="solenoidCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="solenoidLeftBtn" class="btn">电流向左</button><button id="solenoidRightBtn" class="btn">电流向右</button></div><p>👆 切换电流方向，观察磁场方向，验证右手螺旋定则</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="solenoidCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="solenoidLeftBtn" class="btn">电流向左</button><button id="solenoidRightBtn" class="btn">电流向右</button></div><p> 切换电流方向，观察磁场方向，验证右手螺旋定则</p></div>`;
     setTimeout(() => { startSolenoidAnimation(); }, 100);
 	} else if (exp.name === "探究导体在磁场中运动时产生感应电流的条件") {
     animationHtml = `<div class="experiment-animation">
         <h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3>
         <canvas id="inductionCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas>
-        <p style="margin-top:10px;">👆 <strong>拖拽磁铁</strong>穿过线圈，观察感应电流的产生。下方滑块可调节磁场强度、导体长度和回路电阻。</p> </div>`;
+        <p style="margin-top:10px;"> <strong>拖拽磁铁</strong>穿过线圈，观察感应电流的产生。下方滑块可调节磁场强度、导体长度和回路电阻。</p> </div>`;
     setTimeout(() => { startInductionAnimation(); }, 100);
 	} else if (exp.name === "观察电容器的充、放电现象") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="capacitorCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="chargeBtn" class="btn">充电</button><button id="dischargeBtn" class="btn">放电</button></div><p>👆 点击充电/放电，观察电容器电压变化</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="capacitorCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="chargeBtn" class="btn">充电</button><button id="dischargeBtn" class="btn">放电</button></div><p> 点击充电/放电，观察电容器电压变化</p></div>`;
     setTimeout(() => { startCapacitorAnimation(); }, 100);
 	} else if (exp.name === "测量金属丝的电阻率") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="resistivityCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>长度 L: <input type="range" id="resistivityLength" min="0.2" max="1.0" step="0.05" value="0.5"><span id="resistivityLengthVal">0.50</span> m</div><div>直径 d: <input type="range" id="resistivityDia" min="0.2" max="1.0" step="0.05" value="0.5"><span id="resistivityDiaVal">0.50</span> mm</div><div>电压 U: <input type="range" id="resistivityVoltage" min="0" max="5" step="0.1" value="2.0"><span id="resistivityVoltageVal">2.0</span> V</div><div>电流 I: <input type="range" id="resistivityCurrent" min="0" max="1" step="0.01" value="0.4"><span id="resistivityCurrentVal">0.40</span> A</div></div><p>👆 调节参数，计算电阻率 ρ</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="resistivityCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>长度 L: <input type="range" id="resistivityLength" min="0.2" max="1.0" step="0.05" value="0.5"><span id="resistivityLengthVal">0.50</span> m</div><div>直径 d: <input type="range" id="resistivityDia" min="0.2" max="1.0" step="0.05" value="0.5"><span id="resistivityDiaVal">0.50</span> mm</div><div>电压 U: <input type="range" id="resistivityVoltage" min="0" max="5" step="0.1" value="2.0"><span id="resistivityVoltageVal">2.0</span> V</div><div>电流 I: <input type="range" id="resistivityCurrent" min="0" max="1" step="0.01" value="0.4"><span id="resistivityCurrentVal">0.40</span> A</div></div><p> 调节参数，计算电阻率 ρ</p></div>`;
     setTimeout(() => { startResistivityAnimation(); }, 100);
 	} else if (exp.name === "用多用电表测量电学中的物理量") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="multimeterCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="multimeterV" class="btn">电压档</button><button id="multimeterA" class="btn">电流档</button><button id="multimeterR" class="btn">电阻档</button></div><p>👆 选择档位，观察读数</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="multimeterCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="multimeterV" class="btn">电压档</button><button id="multimeterA" class="btn">电流档</button><button id="multimeterR" class="btn">电阻档</button></div><p> 选择档位，观察读数</p></div>`;
     setTimeout(() => { startMultimeterAnimation(); }, 100);
 	} else if (exp.name === "测量电源的电动势和内阻") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="emfCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电动势 E: <input type="range" id="emfE" min="1" max="12" step="0.5" value="6.0"><span id="emfEVal">6.0</span> V</div><div>内阻 r: <input type="range" id="emfR" min="0.2" max="3" step="0.1" value="1.0"><span id="emfRVal">1.0</span> Ω</div><div>负载 R: <input type="range" id="emfLoad" min="0.5" max="20" step="0.5" value="5.0"><span id="emfLoadVal">5.0</span> Ω</div></div><p>👆 调节参数，观察U-I图像和计算值</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="emfCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电动势 E: <input type="range" id="emfE" min="1" max="12" step="0.5" value="6.0"><span id="emfEVal">6.0</span> V</div><div>内阻 r: <input type="range" id="emfR" min="0.2" max="3" step="0.1" value="1.0"><span id="emfRVal">1.0</span> Ω</div><div>负载 R: <input type="range" id="emfLoad" min="0.5" max="20" step="0.5" value="5.0"><span id="emfLoadVal">5.0</span> Ω</div></div><p> 调节参数，观察U-I图像和计算值</p></div>`;
     setTimeout(() => { startEmfAnimation(); }, 100);
 	} else if (exp.name === "探究影响感应电流方向的因素") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="lenzCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="lenzInBtn" class="btn">磁铁插入</button><button id="lenzOutBtn" class="btn">磁铁拔出</button></div><p>👆 插入或拔出磁铁，观察感应电流方向（楞次定律）</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="lenzCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="lenzInBtn" class="btn">磁铁插入</button><button id="lenzOutBtn" class="btn">磁铁拔出</button></div><p> 插入或拔出磁铁，观察感应电流方向（楞次定律）</p></div>`;
     setTimeout(() => { startLenzAnimation(); }, 100);
 	} else if (exp.name === "探究变压器原、副线圈电压与匝数的关系") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="transformerCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>原线圈匝数 n1: <input type="range" id="transformerN1" min="20" max="200" step="10" value="100"><span id="transformerN1Val">100</span></div><div>副线圈匝数 n2: <input type="range" id="transformerN2" min="20" max="200" step="10" value="50"><span id="transformerN2Val">50</span></div><div>输入电压 U1: <input type="range" id="transformerU1" min="0" max="380" step="10" value="220"><span id="transformerU1Val">220</span> V</div></div><p>👆 调节匝数和输入电压，验证 U1/U2 = n1/n2</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="transformerCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>原线圈匝数 n1: <input type="range" id="transformerN1" min="20" max="200" step="10" value="100"><span id="transformerN1Val">100</span></div><div>副线圈匝数 n2: <input type="range" id="transformerN2" min="20" max="200" step="10" value="50"><span id="transformerN2Val">50</span></div><div>输入电压 U1: <input type="range" id="transformerU1" min="0" max="380" step="10" value="220"><span id="transformerU1Val">220</span> V</div></div><p> 调节匝数和输入电压，验证 U1/U2 = n1/n2</p></div>`;
     setTimeout(() => { startTransformerAnimation(); }, 100);
 	} else if (exp.name === "利用传感器制作简单的自动控制装置") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="sensorCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="sensorLightBtn" class="btn">光控模式</button><button id="sensorTempBtn" class="btn">温控模式</button><div>输入值: <input type="range" id="sensorValue" min="0" max="1" step="0.01" value="0.8"><span id="sensorValueVal">0.80</span></div><div>阈值: <input type="range" id="sensorThreshold" min="0" max="1" step="0.01" value="0.5"><span id="sensorThresholdVal">0.50</span></div></div><p>👆 调节传感器值和阈值，观察LED状态变化</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="sensorCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><button id="sensorLightBtn" class="btn">光控模式</button><button id="sensorTempBtn" class="btn">温控模式</button><div>输入值: <input type="range" id="sensorValue" min="0" max="1" step="0.01" value="0.8"><span id="sensorValueVal">0.80</span></div><div>阈值: <input type="range" id="sensorThreshold" min="0" max="1" step="0.01" value="0.5"><span id="sensorThresholdVal">0.50</span></div></div><p> 调节传感器值和阈值，观察LED状态变化</p></div>`;
     setTimeout(() => { startSensorAnimation(); }, 100);
 	} else if (exp.name === "探究光的反射定律") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="reflectionCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>入射角: <input type="range" id="incidentSlider" min="0" max="90" step="1" value="30"><span id="incidentVal">30</span>°</div></div><p>👆 调节入射角，观察反射角始终等于入射角</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="reflectionCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>入射角: <input type="range" id="incidentSlider" min="0" max="90" step="1" value="30"><span id="incidentVal">30</span>°</div></div><p> 调节入射角，观察反射角始终等于入射角</p></div>`;
     setTimeout(() => { startReflectionAnimation(); }, 100);
 	} else if (exp.name === "探究平面镜成像的特点") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="mirrorCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>物距: <input type="range" id="mirrorDist" min="20" max="150" step="5" value="60"><span id="mirrorDistVal">60</span> px</div></div><p>👆 调节物距，观察像距始终等于物距，像与物等大</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="mirrorCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>物距: <input type="range" id="mirrorDist" min="20" max="150" step="5" value="60"><span id="mirrorDistVal">60</span> px</div></div><p> 调节物距，观察像距始终等于物距，像与物等大</p></div>`;
     setTimeout(() => { startPlaneMirrorAnimation(); }, 100);
 	} else if (exp.name === "探究凸透镜成像的规律") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="lensCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>物距 u: <input type="range" id="objectDist" min="20" max="200" step="5" value="80"><span id="objectDistVal">80</span> px</div><div>焦距 f = 40 px (固定)</div></div><p>👆 调节物距，观察成像规律（u>2f、u=2f、f<u<2f、u<f）</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="lensCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>物距 u: <input type="range" id="objectDist" min="20" max="200" step="5" value="80"><span id="objectDistVal">80</span> px</div><div>焦距 f = 40 px (固定)</div></div><p> 调节物距，观察成像规律（u>2f、u=2f、f<u<2f、u<f）</p></div>`;
     setTimeout(() => { startLensAnimation(); }, 100);
 	} else if (exp.name === "测量玻璃的折射率") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="refractiveCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>折射率 n: <input type="range" id="refractiveIndex" min="1.2" max="2.0" step="0.01" value="1.5"><span id="nVal">1.50</span></div><div>入射角 i: <input type="range" id="incidentAngleRef" min="0" max="90" step="1" value="30"><span id="incidentAngleRefVal">30</span>°</div></div><p>👆 调节折射率或入射角，观察折射光线变化，验证 n = sin i / sin r</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="refractiveCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>折射率 n: <input type="range" id="refractiveIndex" min="1.2" max="2.0" step="0.01" value="1.5"><span id="nVal">1.50</span></div><div>入射角 i: <input type="range" id="incidentAngleRef" min="0" max="90" step="1" value="30"><span id="incidentAngleRefVal">30</span>°</div></div><p> 调节折射率或入射角，观察折射光线变化，验证 n = sin i / sin r</p></div>`;
     setTimeout(() => { startRefractiveAnimation(); }, 100);
 	} else if (exp.name === "用双缝干涉实验测量光的波长") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="interferenceCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>波长 λ: <input type="range" id="lambdaSlider" min="400" max="760" step="10" value="600"><span id="lambdaVal">600</span> nm</div><div>双缝间距 d: <input type="range" id="dSlider" min="0.2" max="1.0" step="0.01" value="0.5"><span id="dVal">0.50</span> mm</div><div>缝屏距 L: <input type="range" id="LSlider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="LVal">1.0</span> m</div></div><p>👆 调节参数，观察条纹间距变化，验证 Δx = λL/d</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="interferenceCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>波长 λ: <input type="range" id="lambdaSlider" min="400" max="760" step="10" value="600"><span id="lambdaVal">600</span> nm</div><div>双缝间距 d: <input type="range" id="dSlider" min="0.2" max="1.0" step="0.01" value="0.5"><span id="dVal">0.50</span> mm</div><div>缝屏距 L: <input type="range" id="LSlider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="LVal">1.0</span> m</div></div><p> 调节参数，观察条纹间距变化，验证 Δx = λL/d</p></div>`;
     setTimeout(() => { startInterferenceAnimation(); }, 100);
 	} else if (exp.name === "用电流表测量电流") {
-    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="ammeterCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电流: <input type="range" id="currentSlider" min="0" max="3" step="0.01" value="1.2"><span id="currentVal">1.20</span> A</div></div><p>👆 调节电流，观察电流表指针偏转和读数</p></div>`;
+    animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="ammeterCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="thermo-control"><div>电流: <input type="range" id="currentSlider" min="0" max="3" step="0.01" value="1.2"><span id="currentVal">1.20</span> A</div></div><p> 调节电流，观察电流表指针偏转和读数</p></div>`;
     setTimeout(() => { startAmmeterAnimation(); }, 100);
         } else if (exp.name === "探究水在沸腾前后温度变化的特点") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="boilingCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="boiling-control"><button id="heatBtn" class="btn">加热</button><button id="resetBtn" class="btn">重置</button></div><p>👆 点击加热，观察水温上升和沸腾现象，沸腾时温度保持不变</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="boilingCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="boiling-control"><button id="heatBtn" class="btn">加热</button><button id="resetBtn" class="btn">重置</button></div><p> 点击加热，观察水温上升和沸腾现象，沸腾时温度保持不变</p></div>`;
             setTimeout(() => { startBoilingAnimation(); }, 100);
         } else if (exp.name === "用油膜法估测油酸分子的大小") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="oilCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="oil-film-control"><div>油酸体积: <input type="range" id="oilVolume" min="0.01" max="0.5" step="0.01" value="0.1"><span id="oilVolumeVal">0.10</span> mL</div><div>油膜面积: <input type="range" id="oilArea" min="0.1" max="1.0" step="0.01" value="0.5"><span id="oilAreaVal">0.50</span> m²</div></div><p>👆 调节油酸体积和油膜面积，观察分子直径变化</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="oilCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="oil-film-control"><div>油酸体积: <input type="range" id="oilVolume" min="0.01" max="0.5" step="0.01" value="0.1"><span id="oilVolumeVal">0.10</span> mL</div><div>油膜面积: <input type="range" id="oilArea" min="0.1" max="1.0" step="0.01" value="0.5"><span id="oilAreaVal">0.50</span> m²</div></div><p> 调节油酸体积和油膜面积，观察分子直径变化</p></div>`;
             setTimeout(() => { startOilFilmAnimation(); }, 100);
         } else  if (exp.name === "用刻度尺测量长度，用表测量时间") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="animationCanvas" width="600" height="300" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><p style="margin-top:0.8rem;">👆 拖动橙色滑块测量长度，点击秒表按钮开始/停止计时</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="animationCanvas" width="600" height="300" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><p style="margin-top:0.8rem;"> 拖动橙色滑块测量长度，点击秒表按钮开始/停止计时</p></div>`;
             setTimeout(() => { startLengthTimeAnimation(); }, 100);
         } else if (exp.name === "用弹簧测力计测量力") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="springForceCanvas" width="500" height="300" style="width:100%; height:auto; max-width:500px; margin:0 auto; display:block;"></canvas><div class="force-control"><span>拉力调节：</span><input type="range" id="forceSlider" class="force-slider" min="0" max="5" step="0.1" value="0"><span class="force-value">拉力: <span id="forceValue">0.0</span> N</span></div><p>👆 拖动滑块改变拉力，观察弹簧测力计指针偏转</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="springForceCanvas" width="500" height="300" style="width:100%; height:auto; max-width:500px; margin:0 auto; display:block;"></canvas><div class="force-control"><span>拉力调节：</span><input type="range" id="forceSlider" class="force-slider" min="0" max="5" step="0.1" value="0"><span class="force-value">拉力: <span id="forceValue">0.0</span> N</span></div><p> 拖动滑块改变拉力，观察弹簧测力计指针偏转</p></div>`;
             setTimeout(() => { startSpringForceAnimation(); }, 100);
         } else if (exp.name === "用托盘天平测量物体的质量") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="balanceCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="balance-control"><div><button id="subMass">-</button> 物体质量 <button id="addMass">+</button></div><div><button id="subWeight">-</button> 砝码质量 <button id="addWeight">+</button></div></div><p>👆 调节物体质量和右侧砝码质量，使天平平衡，读取物体质量</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="balanceCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="balance-control"><div><button id="subMass">-</button> 物体质量 <button id="addMass">+</button></div><div><button id="subWeight">-</button> 砝码质量 <button id="addWeight">+</button></div></div><p> 调节物体质量和右侧砝码质量，使天平平衡，读取物体质量</p></div>`;
             setTimeout(() => { startBalanceAnimation(); }, 100);
         } else if (exp.name === "测量物体运动的速度") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="speedCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="speed-control"><div>路程: <input type="range" id="distSlider" min="0" max="100" step="1" value="80"><span id="distValue">80</span> cm</div><div>时间: <input type="range" id="timeSlider" min="0.5" max="5" step="0.1" value="2.0"><span id="timeValue">2.0</span> s</div></div><p>👆 调节路程和时间，观察小车位置并计算平均速度 v = s/t</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="speedCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="speed-control"><div>路程: <input type="range" id="distSlider" min="0" max="100" step="1" value="80"><span id="distValue">80</span> cm</div><div>时间: <input type="range" id="timeSlider" min="0.5" max="5" step="0.1" value="2.0"><span id="timeValue">2.0</span> s</div></div><p> 调节路程和时间，观察小车位置并计算平均速度 v = s/t</p></div>`;
             setTimeout(() => { startSpeedAnimation(); }, 100);
       } else if (exp.name === "测量水平运动物体所受的滑动摩擦力") {
     animationHtml = `<div class="experiment-animation">
@@ -6123,7 +6426,7 @@ function startFrictionInvestigationAnimation() {
             <button id="pullBtn" class="btn">▶ 匀速拉动</button>
             <button id="resetBtn" class="btn">重置位置</button>
             <span style="margin-left:15px;">压力: <button id="subMass">-</button> <span id="massVal">1</span> 个砝码 <button id="addMass">+</button></span> </div>
-        <p style="margin-top:8px;">👆 增加砝码改变压力，点击“匀速拉动”测量摩擦力。</p></div>`;
+        <p style="margin-top:8px;"> 增加砝码改变压力，点击“匀速拉动”测量摩擦力。</p></div>`;
     setTimeout(() => { startFrictionMeasurementAnimation(); }, 100);
 	} else if (exp.name === "探究滑动摩擦力大小与哪些因素有关") {
     animationHtml = `<div class="experiment-animation">
@@ -6138,49 +6441,56 @@ function startFrictionInvestigationAnimation() {
             <span style="margin-left:10px;">压力: <button id="subMass">-</button> <span id="massVal">1</span> <button id="addMass">+</button></span>
             <button id="recordBtn" class="btn" style="margin-left:10px;">📋 记录数据</button>
             <button id="clearBtn" class="btn">清除数据</button> </div>
-        <p style="margin-top:8px;">👆 改变接触面和压力，点击“记录数据”观察摩擦力变化趋势。</p> </div>`;
+        <p style="margin-top:8px;"> 改变接触面和压力，点击“记录数据”观察摩擦力变化趋势。</p> </div>`;
     setTimeout(() => { startFrictionInvestigationAnimation(); }, 100);
         } else if (exp.name === "测量固体和液体的密度") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="densityCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="density-control"><div><button id="modeSolid" class="density-type">固体模式</button><button id="modeLiquid" class="density-type">液体模式</button></div></div><div class="density-control"><div>质量: <input type="range" id="massSlider" min="0" max="200" step="1" value="50"><span id="massValue">50</span> g</div><div>体积: <input type="range" id="volumeSlider" min="1" max="100" step="1" value="40"><span id="volumeValue">40</span> cm³</div></div><p>👆 调节质量与体积，实时观察密度变化及天平平衡、量筒液面</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="densityCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="density-control"><div><button id="modeSolid" class="density-type">固体模式</button><button id="modeLiquid" class="density-type">液体模式</button></div></div><div class="density-control"><div>质量: <input type="range" id="massSlider" min="0" max="200" step="1" value="50"><span id="massValue">50</span> g</div><div>体积: <input type="range" id="volumeSlider" min="1" max="100" step="1" value="40"><span id="volumeValue">40</span> cm³</div></div><p> 调节质量与体积，实时观察密度变化及天平平衡、量筒液面</p></div>`;
             setTimeout(() => { startDensityAnimation(); }, 100);
         } else if (exp.name === "探究液体压强与哪些因素有关") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="pressureCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="pressure-control"><div>深度: <input type="range" id="depthSlider" min="0" max="30" step="1" value="10"><span id="depthValue">10</span> cm</div><div>液体: <select id="liquidSelect" class="liquid-select"><option value="水">水</option><option value="盐水">盐水</option></select></div></div><p>👆 调节探头深度或更换液体，观察U形管压强计液面高度差变化</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="pressureCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="pressure-control"><div>深度: <input type="range" id="depthSlider" min="0" max="30" step="1" value="10"><span id="depthValue">10</span> cm</div><div>液体: <select id="liquidSelect" class="liquid-select"><option value="水">水</option><option value="盐水">盐水</option></select></div></div><p> 调节探头深度或更换液体，观察U形管压强计液面高度差变化</p></div>`;
             setTimeout(() => { startLiquidPressureAnimation(); }, 100);
         } else if (exp.name === "探究浮力大小与哪些因素有关") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="buoyancyCanvas" width="600" height="450" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="buoyancy-control"><div>浸入体积: <input type="range" id="buoyancyVolumeSlider" min="0" max="1" step="0.01" value="0.5"><span id="buoyancyVolumeValue">50</span>%</div><div>液体: <select id="buoyancyLiquidSelect" class="liquid-select"><option value="水">水</option><option value="盐水">盐水</option></select></div></div><p>👆 调节浸入体积或更换液体，观察弹簧测力计示数变化，计算浮力大小</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="buoyancyCanvas" width="600" height="450" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="buoyancy-control"><div>浸入体积: <input type="range" id="buoyancyVolumeSlider" min="0" max="1" step="0.01" value="0.5"><span id="buoyancyVolumeValue">50</span>%</div><div>液体: <select id="buoyancyLiquidSelect" class="liquid-select"><option value="水">水</option><option value="盐水">盐水</option></select></div></div><p> 调节浸入体积或更换液体，观察弹簧测力计示数变化，计算浮力大小</p></div>`;
             setTimeout(() => { startBuoyancyAnimation(); }, 100);
         } else if (exp.name === "探究杠杆的平衡条件") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="leverCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="lever-control"><div>左侧力: <input type="range" id="leftForceSlider" min="0.5" max="5" step="0.1" value="2"><span id="leftForceVal">2.0</span> N</div><div>左侧力臂: <input type="range" id="leftArmSlider" min="1" max="4" step="1" value="3"><span id="leftArmVal">3</span> 格</div></div><div class="lever-control"><div>右侧力: <input type="range" id="rightForceSlider" min="0.5" max="5" step="0.1" value="3"><span id="rightForceVal">3.0</span> N</div><div>右侧力臂: <input type="range" id="rightArmSlider" min="1" max="4" step="1" value="2"><span id="rightArmVal">2</span> 格</div></div><p>👆 调节力的大小或力臂，观察杠杆平衡状态，验证 F1×L1 = F2×L2</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="leverCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="lever-control"><div>左侧力: <input type="range" id="leftForceSlider" min="0.5" max="5" step="0.1" value="2"><span id="leftForceVal">2.0</span> N</div><div>左侧力臂: <input type="range" id="leftArmSlider" min="1" max="4" step="1" value="3"><span id="leftArmVal">3</span> 格</div></div><div class="lever-control"><div>右侧力: <input type="range" id="rightForceSlider" min="0.5" max="5" step="0.1" value="3"><span id="rightForceVal">3.0</span> N</div><div>右侧力臂: <input type="range" id="rightArmSlider" min="1" max="4" step="1" value="2"><span id="rightArmVal">2</span> 格</div></div><p> 调节力的大小或力臂，观察杠杆平衡状态，验证 F1×L1 = F2×L2</p></div>`;
             setTimeout(() => { startLeverAnimation(); }, 100);
         } else if (exp.name === "测量做直线运动物体的瞬时速度") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="instantSpeedCanvas" width="600" height="300" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="instant-speed-control"><div>小车速度: <input type="range" id="instantSpeedSlider" min="0.1" max="2.5" step="0.01" value="1.0"><span id="instantSpeedValue">1.00</span> m/s</div></div><p>👆 调节小车速度，观察纸带上点迹间距变化，计算瞬时速度</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="instantSpeedCanvas" width="600" height="300" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="instant-speed-control"><div>小车速度: <input type="range" id="instantSpeedSlider" min="0.1" max="2.5" step="0.01" value="1.0"><span id="instantSpeedValue">1.00</span> m/s</div></div><p> 调节小车速度，观察纸带上点迹间距变化，计算瞬时速度</p></div>`;
             setTimeout(() => { startInstantSpeedAnimation(); }, 100);
         } else if (exp.name === "探究弹簧弹力与形变量的关系") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="hookeCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="hooke-control"><div>砝码质量: <input type="range" id="hookeMassSlider" min="0" max="200" step="5" value="0"><span id="hookeMassValue">0</span> g</div></div><p>👆 增加砝码质量，观察弹簧伸长量，验证胡克定律 F = k·x</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="hookeCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="hooke-control"><div>砝码质量: <input type="range" id="hookeMassSlider" min="0" max="200" step="5" value="0"><span id="hookeMassValue">0</span> g</div></div><p> 增加砝码质量，观察弹簧伸长量，验证胡克定律 F = k·x</p></div>`;
             setTimeout(() => { startHookeAnimation(); }, 100);
         } else if (exp.name === "探究两个互成角度的力的合成规律") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="forceSynthesisCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="force-synth-control"><div>F1: <input type="range" id="f1Slider" min="0.5" max="8" step="0.1" value="3"><span id="f1Value">3.0</span> N</div><div>F2: <input type="range" id="f2Slider" min="0.5" max="8" step="0.1" value="4"><span id="f2Value">4.0</span> N</div><div>夹角: <input type="range" id="angleSlider" min="0" max="180" step="1" value="60"><span id="angleValue">60</span>°</div></div><p>👆 调节两个力的大小和夹角，观察合力（对角线）的变化，验证平行四边形定则</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="forceSynthesisCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="force-synth-control"><div>F1: <input type="range" id="f1Slider" min="0.5" max="8" step="0.1" value="3"><span id="f1Value">3.0</span> N</div><div>F2: <input type="range" id="f2Slider" min="0.5" max="8" step="0.1" value="4"><span id="f2Value">4.0</span> N</div><div>夹角: <input type="range" id="angleSlider" min="0" max="180" step="1" value="60"><span id="angleValue">60</span>°</div></div><p> 调节两个力的大小和夹角，观察合力（对角线）的变化，验证平行四边形定则</p></div>`;
             setTimeout(() => { startForceSynthesisAnimation(); }, 100);
         } else if (exp.name === "探究加速度与物体受力、物体质量的关系") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="accelerationCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="acceleration-control"><div>拉力 F: <input type="range" id="forceSlider" min="0.5" max="10" step="0.1" value="5.0"><span id="forceVal">5.0</span> N</div><div>小车质量 m: <input type="range" id="massSlider" min="0.5" max="5" step="0.1" value="2.0"><span id="massVal">2.0</span> kg</div></div><p>👆 调节拉力或小车质量，观察加速度变化，验证牛顿第二定律 F = m·a</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="accelerationCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="acceleration-control"><div>拉力 F: <input type="range" id="forceSlider" min="0.5" max="10" step="0.1" value="5.0"><span id="forceVal">5.0</span> N</div><div>小车质量 m: <input type="range" id="massSlider" min="0.5" max="5" step="0.1" value="2.0"><span id="massVal">2.0</span> kg</div></div><p> 调节拉力或小车质量，观察加速度变化，验证牛顿第二定律 F = m·a</p></div>`;
             setTimeout(() => { startAccelerationAnimation(); }, 100);
         } else if (exp.name === "验证机械能守恒定律") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="energyCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="energy-control"><div>释放高度: <input type="range" id="energyHeightSlider" min="0" max="100" step="1" value="80"><span id="energyHeightValue">80</span> cm</div></div><p>👆 调节小球释放高度，观察重力势能、动能和机械能总和，验证守恒定律</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="energyCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="energy-control"><div>释放高度: <input type="range" id="energyHeightSlider" min="0" max="100" step="1" value="80"><span id="energyHeightValue">80</span> cm</div></div><p> 调节小球释放高度，观察重力势能、动能和机械能总和，验证守恒定律</p></div>`;
             setTimeout(() => { startEnergyConservationAnimation(); }, 100);
         } else if (exp.name === "探究平抛运动的特点") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="projectileCanvas" width="800" height="500" style="width:100%; height:auto; max-width:800px; margin:0 auto; display:block;"></canvas><div class="projectile-control"><div>初始高度: <input type="range" id="projectileHeightSlider" min="1" max="20" step="0.1" value="5"><span id="projectileHeightValue">5.0</span> m</div><div>初速度: <input type="range" id="projectileVelocitySlider" min="1" max="30" step="0.1" value="10"><span id="projectileVelocityValue">10.0</span> m/s</div></div><p>👆 调节初始高度和初速度，观察平抛运动轨迹，验证水平匀速、竖直自由落体</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="projectileCanvas" width="800" height="500" style="width:100%; height:auto; max-width:800px; margin:0 auto; display:block;"></canvas><div class="projectile-control"><div>初始高度: <input type="range" id="projectileHeightSlider" min="1" max="20" step="0.1" value="5"><span id="projectileHeightValue">5.0</span> m</div><div>初速度: <input type="range" id="projectileVelocitySlider" min="1" max="30" step="0.1" value="10"><span id="projectileVelocityValue">10.0</span> m/s</div></div><p> 调节初始高度和初速度，观察平抛运动轨迹，验证水平匀速、竖直自由落体</p></div>`;
             setTimeout(() => { startProjectileMotionAnimation(); }, 100);
         } else if (exp.name === "探究向心力大小与半径、角速度、质量的关系") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="centripetalCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="centripetal-control"><div>质量: <input type="range" id="centripetalMassSlider" min="0.1" max="2.0" step="0.1" value="0.5"><span id="centripetalMassValue">0.5</span> kg</div><div>半径: <input type="range" id="centripetalRadiusSlider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="centripetalRadiusValue">1.0</span> m</div><div>角速度: <input type="range" id="centripetalOmegaSlider" min="0.5" max="5.0" step="0.1" value="2.0"><span id="centripetalOmegaValue">2.0</span> rad/s</div></div><p>👆 调节质量、半径或角速度，观察向心力变化，验证 F = mω²r</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="centripetalCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="centripetal-control"><div>质量: <input type="range" id="centripetalMassSlider" min="0.1" max="2.0" step="0.1" value="0.5"><span id="centripetalMassValue">0.5</span> kg</div><div>半径: <input type="range" id="centripetalRadiusSlider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="centripetalRadiusValue">1.0</span> m</div><div>角速度: <input type="range" id="centripetalOmegaSlider" min="0.5" max="5.0" step="0.1" value="2.0"><span id="centripetalOmegaValue">2.0</span> rad/s</div></div><p> 调节质量、半径或角速度，观察向心力变化，验证 F = mω²r</p></div>`;
             setTimeout(() => { startCentripetalForceAnimation(); }, 100);
         } else if (exp.name === "长度的测量及其测量工具的选用") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="lengthCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="length-control"><div>长度: <input type="range" id="lengthSlider" min="1.0" max="10.0" step="0.1" value="5.0"><span id="lengthValue">5.00</span> cm</div><div>测量工具: <select id="lengthToolSelect" class="surface-select"><option value="ruler">刻度尺</option><option value="caliper">游标卡尺</option><option value="micrometer">螺旋测微器</option></select></div></div><p>👆 调节被测物体长度，切换不同测量工具，观察精度差异</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="lengthCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="length-control"><div>长度: <input type="range" id="lengthSlider" min="1.0" max="10.0" step="0.1" value="5.0"><span id="lengthValue">5.00</span> cm</div><div>测量工具: <select id="lengthToolSelect" class="surface-select"><option value="ruler">刻度尺</option><option value="caliper">游标卡尺</option><option value="micrometer">螺旋测微器</option></select></div></div><p> 调节被测物体长度，切换不同测量工具，观察精度差异</p></div>`;
             setTimeout(() => { startLengthMeasurementAnimation(); }, 100);
         } else if (exp.name === "验证动量守恒定律") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="momentumCanvas" width="800" height="400" style="width:100%; height:auto; max-width:800px; margin:0 auto; display:block;"></canvas><div class="momentum-control"><div>m1: <input type="range" id="momentumM1Slider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="momentumM1Value">1.0</span> kg</div><div>v1: <input type="range" id="momentumV1Slider" min="0.0" max="5.0" step="0.1" value="2.0"><span id="momentumV1Value">2.0</span> m/s</div><div>m2: <input type="range" id="momentumM2Slider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="momentumM2Value">1.0</span> kg</div><div>v2: <input type="range" id="momentumV2Slider" min="0.0" max="5.0" step="0.1" value="0.0"><span id="momentumV2Value">0.0</span> m/s</div></div><p>👆 调节两滑块的质量和初速度，观察碰撞过程及动量守恒验证</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="momentumCanvas" width="800" height="400" style="width:100%; height:auto; max-width:800px; margin:0 auto; display:block;"></canvas>
+<div class="momentum-control" style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin-top:10px;">
+  <div>m1: <input type="range" id="momentumM1Slider" min="0.5" max="2.0" step="0.1" value="1.0"> <span id="momentumM1Value">1.0</span> kg</div>
+  <div>v1: <input type="range" id="momentumV1Slider" min="0.0" max="5.0" step="0.1" value="2.0"> <span id="momentumV1Value">2.0</span> m/s</div>
+  <div>m2: <input type="range" id="momentumM2Slider" min="0.5" max="2.0" step="0.1" value="1.0"> <span id="momentumM2Value">1.0</span> kg</div>
+  <div>v2: <input type="range" id="momentumV2Slider" min="-5.0" max="5.0" step="0.1" value="-2.0"> <span id="momentumV2Value">-2.0</span> m/s</div>
+  <button id="momentumResetBtn" class="btn" style="background:#27ae60; color:white; padding:6px 16px;">重置</button>
+</div><p> 调节质量和速度（v2 可负表示向左），点击重置或拖动滑块后自动重新排列位置并开始碰撞模拟。红色静止（v1=0）时蓝色需有合适方向才能碰撞。</p></div>`;
             setTimeout(() => { startMomentumConservationAnimation(); }, 100);
         } else if (exp.name === "用单摆测量重力加速度的大小") {
-            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="pendulumCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="pendulum-control"><div>摆长: <input type="range" id="pendulumLengthSlider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="pendulumLengthValue">1.00</span> m</div><div>摆角: <input type="range" id="pendulumAngleSlider" min="1" max="30" step="1" value="15"><span id="pendulumAngleValue">15.0</span>°</div></div><p>👆 调节摆长和摆角，观察单摆运动，通过周期计算重力加速度 g = 4π²L/T²</p></div>`;
+            animationHtml = `<div class="experiment-animation"><h3><i class="fas fa-chalkboard"></i> 交互式模拟实验</h3><canvas id="pendulumCanvas" width="600" height="400" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas><div class="pendulum-control"><div>摆长: <input type="range" id="pendulumLengthSlider" min="0.5" max="2.0" step="0.1" value="1.0"><span id="pendulumLengthValue">1.00</span> m</div><div>摆角: <input type="range" id="pendulumAngleSlider" min="1" max="30" step="1" value="15"><span id="pendulumAngleValue">15.0</span>°</div></div><p> 调节摆长和摆角，观察单摆运动，通过周期计算重力加速度 g = 4π²L/T²</p></div>`;
             setTimeout(() => { startPendulumAnimation(); }, 100);
         }
 
